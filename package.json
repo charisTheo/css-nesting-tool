@@ -1,0 +1,25 @@
+{
+  "name": "css-nesting",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "@material/web": "^1.0.0"
+  },
+  "devDependencies": {
+    "vite": "^4.0.0"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead"
+  ],
+  "engines": {
+    "node": "16.x"
+  },
+  "glitch": {
+    "projectType": "generated_static"
+  }
+}
