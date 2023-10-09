@@ -1,7 +1,7 @@
 {
   "name": "css-nesting-tool",
   "version": "0.0.1",
-  "homepage": "https://charistheo.github.io/css-nesting-tool",
+  "homepage": "https://charistheo.github.io/css-nesting-tool/",
   "scripts": {
     "start": "vite",
     "build": "vite build",
