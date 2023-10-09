@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Demo | CSS Nesting optimisation</title>
+</head>
+<body>
+  <form id='css-file-form'>
+    <label>
+      CSS file URL:
+      <input type='URL' placeholder='CSS file URL' />
+    </label>
+  
+    <button type='submit'>Submit</button>
+    <small>https://www.w3.org/StyleSheets/Core/Modernist</small>
+  </form>
+
+  <div hidden id='nested-css-container'>
+    <h2>Nested CSS</h2>
+    <textarea></textarea>
+  </div>
+
+  <script type='module'>
+    import { getMinifiedCSS } from './index.js'
+
+    document.querySelector('#css-file-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const fileUrl = document.querySelector("input[type='URL']").value
+      const response = await fetch(fileUrl)
+      const cssText = await response.text()
+      const styleSheet = new CSSStyleSheet()
+      styleSheet.replaceSync(cssText)
+      const minifiedCSS = getMinifiedCSS(styleSheet)
+
+      const nestedCSSContainer = document.querySelector('#nested-css-container')
+      nestedCSSContainer.removeAttribute('hidden')
+      nestedCSSContainer.querySelector('textarea').value = minifiedCSS
+    });
+
+    // TODO Show side-by-side comparison
+    // TODO compare KBs
+
+  </script>
+</body>
+</html>

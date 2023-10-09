@@ -1,0 +1,25 @@
+.nav {
+  background: #d4bbff;
+}
+
+.nav ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul > li {
+  display: block;
+}
+
+.nav li a {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.7rem;
+  padding: 1rem;
+  color: #000;
+  text-decoration: none;
+}
+
+.nav li a::before {
+  content: '➡️';
+}
