@@ -1,13 +1,17 @@
 {
-  "name": "css-nesting",
+  "name": "css-nesting-tool",
   "version": "0.0.1",
+  "homepage": "https://charistheo.github.io/css-nesting-tool",
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "dependencies": {
-    "@material/web": "^1.0.0"
+    "@material/web": "^1.0.0",
+    "gh-pages": "^6.0.0"
   },
   "devDependencies": {
     "vite": "^4.0.0"
