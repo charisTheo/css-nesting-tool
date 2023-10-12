@@ -28,7 +28,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
   );
 }
 
-function cssTextMapToString(object, isNested = false) {
+function cssTextMapToString(object, isNested = false, minifyEnabled) {
   const keys = Object.keys(object)
   
   return keys.map(k => {
@@ -40,23 +40,58 @@ function cssTextMapToString(object, isNested = false) {
     }
 
     if (k === 'cssText') {
-      return object[k].trim() + '\n';
+      return (minifyEnabled ? object[k].trim() : object[k].trim().replaceAll('; ', ';\n'));
     } else {
-      return `${isNested ? '&' : ''} ${k}${skipNesting ? '' : '{\n'}${cssTextMapToString(object[k], !skipNesting).join('')}${skipNesting ? '' : '}\n'}`
+      return `${addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled)}${skipNesting ? '' : openBrackets(minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled).join('')}${skipNesting ? '' : closeBrackets(minifyEnabled)}`
     }
   })
 }
 
-export function getMinifiedCSS(styleSheet) {
+/**
+ * 
+ * @param {StyleSheet} styleSheet
+ * @param {Boolean} minifyEnabled
+ * @returns 
+ */
+export function getMinifiedCSS(styleSheet, minifyEnabled) {
   const TOP_SELECTORS_MAP = {};
 
   // const styleSheet = document.styleSheets[0];
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
-  console.log('🪲 | rules:', rules);
+  // console.log('🪲 | rules:', rules);
 
   rules.forEach(rule => mapCssTextInSelectors(rule, TOP_SELECTORS_MAP));
 
-  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP).join('');
-  console.log('🪲 | cssTextString:', cssTextString);
+  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
+  // console.log('🪲 | cssTextString:', cssTextString);
   return cssTextString;
+}
+
+function addNestCharacter(isNested, minifyEnabled) {
+  return isNested ? (minifyEnabled ? '& ' : '\n\n  & ') : ''
+}
+function addSelector(selector, minifyEnabled) {
+  return selector + (minifyEnabled ? '' : ' ')
+}
+function openBrackets(minifyEnabled) {
+  return minifyEnabled ? '{' : '{\n  '
+}
+function closeBrackets(minifyEnabled) {
+  return minifyEnabled ? '}' : '\n}\n\n'
+}
+
+/**
+ * @param {String} text - i.e. 'abababababababa'
+ * @returns {String} - '15'
+ */
+export function textToKBs(text) {
+  return splitThousandsWithComma((text.length / 1024).toFixed(2))
+}
+
+export function splitThousandsWithComma(number) {
+  const numberString = String(number);
+  const [integerPart, decimalPart] = numberString.split('.');
+  const integerPartWithCommas = integerPart.replace(/(?<!\B)\d{3}(?=\B)/g, ',');
+  const numberWithCommas = `${integerPartWithCommas}.${decimalPart}`;
+  return numberWithCommas;
 }
