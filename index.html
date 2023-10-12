@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <base href="https://charistheo.github.io/css-nesting-tool/" />
-
+    <!-- <base href="/css-nesting-tool/" /> -->
     <title>Demo | CSS Nesting optimisation</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,13 +10,28 @@
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Open%20Sans:wght@400;500;700&display=swap');
 
+      *, *:before, *:after {
+        box-sizing: border-box;
+      }
+      ::-webkit-scrollbar {
+        background: inherit;
+        -webkit-border-top-right-radius: 15px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--md-sys-color-on-background);
+        -webkit-border-radius: 15px;
+        min-height: 30px;
+      }
+      ::-webkit-scrollbar-corner {
+        background: inherit;
+      }
       :root {
         --md-sys-color-background: #10002c;
         --md-sys-color-on-background: #EADDFF;
         --md-ref-typeface-brand: 'Open Sans';
         --md-ref-typeface-plain: system-ui;
         --md-icon-font: 'Material Symbols Rounded';
-        
+        --md-fab-small-icon-size: 20px;
       }
       body, html {
         margin: 0;
@@ -33,53 +47,152 @@
         display: none;
       }
       md-filled-text-field {
-        --md-filled-field-supporting-text-color: var(--md-sys-color-on-background);        
+        --md-filled-field-supporting-text-color: var(--md-sys-color-on-background);
+      }
+      a {
+        color: var(--md-sys-color-on-background);
       }
       
-      form, #nested-css-container {
+      #page-intro {
+        margin: 2rem auto 4rem;
+        text-align: center;
+        padding: 2rem;
+      }
+
+      form, #nested-css-container:not([hidden]), #example-wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
         gap: 1rem;
         margin: 2rem auto;
       }
+
+      #example-wrapper {
+        gap: 2rem;
+        max-width: 500px;
+      }
+
+      label:has(md-checkbox) {
+        display: flex;
+        align-items: center;
+        --md-checkbox-outline-color: var(--md-sys-color-on-background);
+        --md-checkbox-focus-outline-color: var(--md-sys-color-on-background);
+        --md-checkbox-hover-outline-color: var(--md-sys-color-on-background);
+      }
       
       #comparison-container {
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         gap: 1rem;
-      }
-      textarea {
-        background-color: #4F378B;
-        border: none;
         padding: 1rem;
+        width: 100%;
+        position: relative;
+        --fab-top-offset: 1rem;
+        margin-top: var(--fab-top-offset);
+
+        > div {
+          flex: 1 1 auto;
+          max-width: calc(50% - 1rem);
+          width: 50%;
+          min-height: 100%;
+        }
+
+        & #copy-button {
+          position: absolute;
+          top: calc(-1 * var(--fab-top-offset));
+          right: 1rem;
+          cursor: pointer;
+        }
+
+        & .file-weight {
+          margin-bottom: 0.5rem;
+          font-weight: bold;
+          display: block;
+        }
+        
+        & div:has(> textarea) {
+          --md-elevation-level: 3;
+          position: relative;
+          border-radius: 15px;
+          min-height: 100%;
+
+          > textarea {
+            font-family: monospace;
+            border-radius: inherit;
+            color: var(--md-sys-color-on-background);
+            background-color: #4F378B;
+            border: none;
+            padding: 1rem;
+            width: 100%;
+            max-width: 100%;
+            min-width: 100%;
+            min-height: 100%;
+          }
+        }
       }
     </style>
   </head>
   <body>
     <md-linear-progress four-color indeterminate></md-linear-progress>
 
+    <div id='page-intro'>
+      <h1>CSS Nesting tool</h1>
+      <a href='https://developer.chrome.com/articles/css-nesting/'>Learn more about CSS Nesting</a>
+      <p>
+        <!-- TODO Add a short description about what this tool does -->
+        
+      </p>
+    </div>
+
     <form id="css-file-form">
-      <md-filled-text-field 
-        type="URL" 
-        label="File URL"
-      >
+      <md-filled-text-field type="URL" label="File URL">
         <md-icon slot="leading-icon">css</md-icon>
       </md-filled-text-field>
-      <small>i.e. https://www.w3.org/StyleSheets/Core/Modernist</small>
+
+      <div>
+        <label>
+          Minify Nested CSS
+          <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
+        </label>
+      </div>
 
       <md-filled-tonal-button type="submit">
-        <md-icon slot="icon">electric_bolt</md-icon>        
+        <md-icon slot="icon">electric_bolt</md-icon>
         Nest CSS
       </md-filled-tonal-button>
     </form>
 
+    <div id='example-wrapper'>
+      <md-divider role="separator">OR</md-divider>
+  
+      <md-filled-tonal-button id='example-button'>
+        <md-icon slot="icon">science</md-icon>
+        Try an example
+      </md-filled-tonal-button>
+    </div>
+
     <div hidden id="nested-css-container">
-      <h2>Nested CSS</h2>
-      
       <div id="comparison-container">
-        <textarea id="textarea-before"></textarea>
-        <textarea id="textarea-after"></textarea>
+        <div class='before'>
+          <small class='file-weight'></small>
+          
+          <div>
+            <md-elevation></md-elevation>
+            <textarea rows='20' id="textarea-before"></textarea>
+          </div>
+        </div>
+        <div class='after'>
+          <small class='file-weight'></small>
+
+          <md-fab id='copy-button' size='small' aria-label="Copy to clipboard">
+            <md-icon size='small' slot="icon">content_copy</md-icon>
+          </md-fab>
+
+          <div>
+            <md-elevation></md-elevation>
+            <textarea rows='20' id="textarea-after"></textarea>
+          </div>
+        </div>
       </div>
     </div>
     
