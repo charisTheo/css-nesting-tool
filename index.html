@@ -36,6 +36,9 @@
         --md-ref-typeface-plain: system-ui;
         --md-icon-font: 'Material Symbols Rounded';
         --md-fab-small-icon-size: 20px;
+        --md-filled-tonal-button-disabled-container-color: var(--md-sys-color-on-background);
+        --md-filled-tonal-button-disabled-label-text-color: var(--md-filled-tonal-button-disabled-container-color);
+        --md-filled-tonal-button-disabled-icon-color: var(--md-filled-tonal-button-disabled-container-color);
       }
 
       body, html {
@@ -55,6 +58,10 @@
 
       md-filled-text-field {
         --md-filled-field-supporting-text-color: var(--md-sys-color-on-background);
+        --md-filled-field-container-shape-end-end: var(--md-filled-field-container-shape-start-start);
+        --md-filled-field-container-shape-end-start: var(--md-filled-field-container-shape-start-start);
+        --md-filled-field-active-indicator-color: transparent;
+        --md-filled-field-hover-active-indicator-color: transparent;
       }
 
       a {
@@ -71,13 +78,39 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 1rem;
-        margin: 2rem auto;
+        gap: 2rem;
+        margin: 4rem auto;
+        position: relative;
+      }
+
+      form #form-buttons-wrapper {
+        display: flex;
+        align-items: center;
+
+        & [type='submit'] {
+          flex: 1 0 100%;
+        }
+        & md-divider {
+          flex: 0 0.7 100%;
+          rotate: 90deg;
+        }
+        & #paste-css-button {
+          flex: 1 0 auto;
+        }
       }
 
       #example-wrapper {
-        gap: 2rem;
+        gap: 4rem;
         max-width: 500px;
+
+        > span {
+          width: 50px;
+          position: absolute;
+          left: calc(50% - 25px);
+          top: -10px;
+          text-align: center;
+          background-color: var(--md-sys-color-background);
+        }
       }
 
       label:has(md-checkbox) {
@@ -86,6 +119,12 @@
         --md-checkbox-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-focus-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-hover-outline-color: var(--md-sys-color-on-background);
+
+        &#minify-css-label {
+          position: absolute;
+          right: 0;
+          bottom: -3rem;
+        }
       }
 
       #comparison-container {
@@ -139,7 +178,7 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-8a57d1f4.js"></script>
+    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-1a2164ff.js"></script>
   </head>
   <body>
     <md-linear-progress four-color indeterminate></md-linear-progress>
@@ -158,21 +197,29 @@
         <md-icon slot="leading-icon">css</md-icon>
       </md-filled-text-field>
 
-      <div>
-        <label>
-          Minify Nested CSS
-          <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
-        </label>
-      </div>
+      <label id='minify-css-label'>
+        Minify Nested CSS
+        <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
+      </label>
 
-      <md-filled-tonal-button type="submit">
-        <md-icon slot="icon">electric_bolt</md-icon>
-        Nest CSS
-      </md-filled-tonal-button>
+      <div id='form-buttons-wrapper'>
+        <md-filled-tonal-button disabled type="submit">
+          <md-icon slot="icon">electric_bolt</md-icon>
+          Nest CSS from file
+        </md-filled-tonal-button>
+        
+        <md-divider role="separator"></md-divider>
+        
+        <md-filled-tonal-icon-button type='button' id='paste-css-button' aria-label='Paste CSS content'>
+          <md-icon>content_paste</md-icon>
+        </md-filled-tonal-icon-button>
+      </div>
     </form>
 
+
     <div id='example-wrapper'>
-      <md-divider role="separator">OR</md-divider>
+      <span>OR</span>
+      <md-divider role="separator"></md-divider>
   
       <md-filled-tonal-button id='example-button'>
         <md-icon slot="icon">science</md-icon>
