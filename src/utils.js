@@ -1,4 +1,9 @@
 function mapCssTextInSelectors(rule, currentLevel) {
+  if (!rule.selectorText) {
+    // keyframes and media queries
+    // TODO add keyframes and media queries to the final CSS text
+    return
+  }
   // * in minified CSS, splitting with space still works!
   const selectors = rule.selectorText.split(/>|\s|\+/).filter(s => s);
   const ruleTopSelector = selectors[0];
