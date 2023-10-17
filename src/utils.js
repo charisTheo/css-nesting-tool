@@ -1,7 +1,26 @@
+const CSS_RULE_TYPES = {
+  4: { identifier: '@media', valueKey: 'conditionText' },
+  7: { identifier: '@keyframes', valueKey: 'name' },
+  12: { identifier: '@supports', valueKey: 'conditionText' },
+}
+
 function mapCssTextInSelectors(rule, currentLevel) {
   if (!rule.selectorText) {
-    // keyframes and media queries
-    // TODO add keyframes and media queries to the final CSS text
+    // It's a @rule
+    if (CSS_RULE_TYPES[rule.type]) {
+      const { identifier, valueKey } = CSS_RULE_TYPES[rule.type]
+      currentLevel[`${identifier} ${rule[valueKey]}`] = {}
+      if (!rule.cssRules) {
+        console.log('rule', rule)
+      } else {
+          Array.from(rule.cssRules).map(r => {
+          mapCssTextInSelectors(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
+        })
+      }
+    } else {
+      // TODO debug only - What other rule types are there
+      console.log('👨‍💻 | mapCssTextInSelectors | rule:', rule);
+    }
     return
   }
   // * in minified CSS, splitting with space still works!
