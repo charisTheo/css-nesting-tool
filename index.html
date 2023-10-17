@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- <base href="/css-nesting-tool/" /> -->
-    <title>Demo | CSS Nesting optimisation</title>
+    <title>Demo | CSS Nesting optimization</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Rounded" rel="stylesheet">
@@ -26,8 +25,9 @@
         background: inherit;
       }
       :root {
-        --md-sys-color-background: #10002c;
-        --md-sys-color-on-background: #EADDFF;
+        --md-sys-color-background: #EADDFF;
+        --md-sys-color-on-background: #10002c;
+        --md-sys-color-surface: #d3c1ff;
         --md-ref-typeface-brand: 'Open Sans';
         --md-ref-typeface-plain: system-ui;
         --md-icon-font: 'Material Symbols Rounded';
@@ -36,6 +36,14 @@
         --md-filled-tonal-button-disabled-label-text-color: var(--md-filled-tonal-button-disabled-container-color);
         --md-filled-tonal-button-disabled-icon-color: var(--md-filled-tonal-button-disabled-container-color);
       }
+      @media screen and (prefers-color-scheme: dark) {
+        :root {
+          --md-sys-color-background: #10002c;
+          --md-sys-color-on-background: #EADDFF;
+          --md-sys-color-surface: #4F378B;
+        }
+      }
+
       body, html {
         margin: 0;
         color: var(--md-sys-color-on-background);
@@ -61,9 +69,25 @@
       }
       
       #page-intro {
-        margin: 2rem auto 4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
         text-align: center;
+        gap: 1rem;
         padding: 2rem;
+
+        & .description {
+          text-wrap: balance;
+          max-width: 600px;
+        }
+        & #browser-support-embed {
+          width: 100%;
+          margin: 0;
+          display: none;
+        }
+        & label:has(md-switch) {
+          align-self: flex-end;
+        }
       }
 
       form, #nested-css-container:not([hidden]), #example-wrapper {
@@ -105,9 +129,10 @@
         }
       }
 
-      label:has(md-checkbox) {
+      label:has(md-checkbox, md-switch) {
         display: flex;
         align-items: center;
+        gap: 1rem;
         --md-checkbox-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-focus-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-hover-outline-color: var(--md-sys-color-on-background);
@@ -154,14 +179,15 @@
           position: relative;
           border-radius: 15px;
           min-height: 100%;
+          display: grid;
 
           > textarea {
             font-family: monospace;
             border-radius: inherit;
             color: var(--md-sys-color-on-background);
-            background-color: #4F378B;
+            background-color: var(--md-sys-color-surface);
             border: none;
-            padding: 1rem;
+            padding: 1.5rem;
             width: 100%;
             max-width: 100%;
             min-width: 100%;
@@ -176,10 +202,25 @@
 
     <div id='page-intro'>
       <h1>CSS Nesting tool</h1>
-      <a href='https://developer.chrome.com/articles/css-nesting/'>Learn more about CSS Nesting</a>
-      <p>
-        <!-- TODO Add a short description about what this tool does -->
-        
+      <p class='description'>
+        Shrink your CSS files and benefit from improving rendering performance and decreasing the impact on your users' data with CSS Nesting.
+        <br />
+        <a target='_blank' href='https://developer.chrome.com/articles/css-nesting/'>
+          Learn more about CSS Nesting
+        </a>
+      </p>
+
+      <label>
+        Show browser support
+        <md-switch aria-controls='browser-support-embed' icons aria-label='Show browser support'></md-switch>
+      </label>
+
+      <p id='browser-support-embed' class="ciu_embed" data-feature="css-nesting" data-periods="future_1,current,past_1,past_2" data-accessible-colours="false">
+        <picture>
+        <source type="image/webp" srcset="https://caniuse.bitsofco.de/image/css-nesting.webp">
+        <source type="image/png" srcset="https://caniuse.bitsofco.de/image/css-nesting.png">
+        <img height='400' loading='lazy' src="https://caniuse.bitsofco.de/image/css-nesting.jpg" alt="Data on support for the css-nesting feature across the major browsers from caniuse.com">
+        </picture>
       </p>
     </div>
 
@@ -244,5 +285,6 @@
     </div>
     
     <script type="module" src="./src/index.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/gh/ireade/caniuse-embed/public/caniuse-embed.min.js"></script>
   </body>
 </html>

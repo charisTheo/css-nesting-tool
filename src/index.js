@@ -8,6 +8,7 @@ import '@material/web/elevation/elevation'
 import '@material/web/checkbox/checkbox'
 import '@material/web/divider/divider'
 import '@material/web/fab/fab'
+import '@material/web/switch/switch'
 
 import { getMinifiedCSS, textToKBs } from './utils.js'
 
@@ -77,25 +78,37 @@ function displayResults(afterStyleSheet, before) {
   nestedCSSContainer.querySelector('#textarea-before').value = before
   nestedCSSContainer.querySelector('#textarea-after').value = after
   // show character length comparison - assuming UTF-8 encoding - 1 character = 1 byte
+  // Can get encoding from Content-Type header in charset parameter
   nestedCSSContainer.querySelector('.before .file-weight').textContent = `Original: ${textToKBs(before)} KBs`
   nestedCSSContainer.querySelector('.after .file-weight').textContent = `With Nesting: ${textToKBs(after)} KBs`
 
   const copyButton = nestedCSSContainer.querySelector('.after #copy-button')
   copyButton.addEventListener('click', () => {
     const copied = copyToClipboard(after)
+    const copyButtonIcon = copyButton.querySelector('md-icon')
+    const currentIcon = copyButtonIcon.innerText
+
     if (copied) {
-      const copyButtonIcon = copyButton.querySelector('md-icon')
-      const currentIcon = copyButtonIcon.innerText
       copyButtonIcon.innerText = 'done'
       copyButton.style.setProperty('--md-fab-container-color', '#4CAF50')
-      
-      setTimeout(() => {
-        copyButtonIcon.innerText = currentIcon
-        copyButton.style.removeProperty('--md-fab-container-color')
-      }, 3000);
+      copyButton.style.setProperty('--md-fab-icon-color', '#ffffff')
+    } else {
+      copyButtonIcon.innerText = 'error'
+      copyButton.style.setProperty('--md-fab-container-color', '#F44336')
+      copyButton.style.setProperty('--md-fab-icon-color', '#ffffff')
     }
+    
+    setTimeout(() => {
+      copyButtonIcon.innerText = currentIcon
+      copyButton.style.removeProperty('--md-fab-container-color')
+      copyButton.style.removeProperty('--md-fab-icon-color')
+    }, 3000);
   })
 }
+
+document.querySelector("md-switch[aria-controls='browser-support-embed']").addEventListener('change', e => {
+  document.querySelector('#browser-support-embed').style.display = e.target.selected ? 'block' : 'none'
+})
 
 async function showLoadingIndicator() {
   await yieldToMain();
