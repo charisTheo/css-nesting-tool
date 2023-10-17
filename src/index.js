@@ -23,7 +23,11 @@ async function onSubmit(fileUrl) {
   if (!fileUrl) {
     fileUrl = EXAMPLE_CSS_FILE_URL
   }
-  const [styleSheet, cssText] = await fetchAndCreateStylesheet(fileUrl);
+  const results = await fetchAndCreateStylesheet(fileUrl)
+  if (!results) {
+    return
+  }
+  const [styleSheet, cssText] = results
   displayResults(styleSheet, cssText)
   hideLoadingIndicator()
 }
@@ -51,7 +55,7 @@ document.querySelector('#paste-css-button').addEventListener('click', async () =
     const styleSheet = createStylesheetFromText(cssText)
     displayResults(styleSheet, cssText)
   } catch (error) {
-    alert('Failed to read clipboard');
+    alert('Failed to parse CSS from your clipboard');
   }
   hideLoadingIndicator()
 })
@@ -62,11 +66,16 @@ function createStylesheetFromText(cssText) {
   return styleSheet;
 }
 async function fetchAndCreateStylesheet(url) {
-  const response = await fetch(url)
-  const cssText = await response.text()
-  const styleSheet = new CSSStyleSheet()
-  styleSheet.replaceSync(cssText)
-  return [styleSheet, cssText]
+  try {
+    const response = await fetch(url)
+    const cssText = await response.text()
+    const styleSheet = new CSSStyleSheet()
+    styleSheet.replaceSync(cssText)
+    return [styleSheet, cssText]
+  } catch (err) {
+    alert('Failed to fetch CSS file')
+  }
+  return null
 }
 
 function displayResults(afterStyleSheet, before) {
