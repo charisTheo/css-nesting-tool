@@ -4,6 +4,7 @@
   "homepage": "https://charistheo.github.io/css-nesting-tool/",
   "scripts": {
     "start": "vite",
+    "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
     "predeploy": "npm run build",
