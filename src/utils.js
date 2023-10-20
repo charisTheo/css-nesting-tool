@@ -1,3 +1,4 @@
+// TODO Add support for Container queries
 const NON_SELECTOR_RULE_TYPES = {
   4: { identifier: '@media', valueKey: 'conditionText' },
   7: { identifier: '@keyframes', valueKey: 'name' },
@@ -20,7 +21,6 @@ function mapCssTextInSelectors(rule, currentLevel) {
       }
     } else {
       // TODO debug only - What other rule types are there
-      // Container queries
       console.log('👨‍💻 | mapCssTextInSelectors | rule:', rule);
     }
     return

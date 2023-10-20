@@ -14,7 +14,6 @@ import { getMinifiedCSS, textToKBs } from './utils.js'
 
 const EXAMPLE_CSS_FILE_URL = 'https://github.githubassets.com/assets/primer-d6dcdf72e61d.css'
 
-// TODO add CSS file upload button
 async function onSubmit(fileUrl) {
   showLoadingIndicator()
 
