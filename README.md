@@ -7,6 +7,8 @@ Shrink your CSS files and benefit from improving rendering performance and decre
 🎉 [CSS Nesting is part of Interop 2024](https://github.com/web-platform-tests/interop/issues/420)
 📖 [Learn more about CSS Nesting](https://developer.chrome.com/articles/css-nesting/)
 
+![CSS nesting tool demo screenshot](./demo-screenshot.png)
+
 ## Development
 
 ### Run locally
