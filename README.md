@@ -39,6 +39,7 @@ npm run build && npm run serve
 
 ### TODOs
 
+- [ ] Use [minifier](https://github.com/matthiasmullie/minify) after nesting
 - [ ] Add CSS file upload button
 - [ ] Add support for Container queries
 - [ ] Remove nest character (&) for rules inside media queries 

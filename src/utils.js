@@ -73,9 +73,11 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
      */
 
     if (k === 'cssText') {
-      return (minifyEnabled ? object[k].trim() : object[k].trim().replaceAll('; ', ';\n\t'));
+      return minifyEnabled 
+        ? object[k].trim().replaceAll(': ', ':') 
+        : object[k].trim().replaceAll('; ', `;\n${isNested ? '    ' : '  '}`)
     } else {
-      return `${addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled)}${skipNesting ? '' : openBrackets(minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled).join('')}${skipNesting ? '' : closeBrackets(minifyEnabled)}`
+      return `${addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`
     }
   })
 }
@@ -106,11 +108,11 @@ function addNestCharacter(isNested, minifyEnabled) {
 function addSelector(selector, minifyEnabled) {
   return selector + (minifyEnabled ? '' : ' ')
 }
-function openBrackets(minifyEnabled) {
-  return minifyEnabled ? '{' : '{\n\t'
+function openBrackets(isNested, minifyEnabled) {
+  return minifyEnabled ? '{' : `{\n  ${isNested ? '  ' : ''}`
 }
-function closeBrackets(minifyEnabled) {
-  return minifyEnabled ? '}' : '\n}\n\n'
+function closeBrackets(isNested, minifyEnabled) {
+  return minifyEnabled ? '}' : `\n${isNested ? '  ' : ''}}\n`
 }
 
 /**
