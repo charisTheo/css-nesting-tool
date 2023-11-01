@@ -1,5 +1,3 @@
-// TODO create getCssText and getSelector helper functions for @property, @page, @container
-// TODO nest pseudo elements/selectors, i.e. :hover, :active, :before
 const NON_SELECTOR_RULE_TYPES = {
   0: { identifier: '@property', valueKey: 'cssText' },
   4: { identifier: '@media', valueKey: 'conditionText' },

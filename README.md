@@ -41,8 +41,8 @@ npm run build && npm run serve
 
 ### TODOs
 
-- [ ] Use [minifier](https://github.com/matthiasmullie/minify) after nesting
-- [ ] Add CSS file upload button
-- [ ] Add support for Container queries
-- [ ] Remove nest character (&) for rules inside media queries 
-  (e.g. `@media (prefers-color-scheme: light) {  & .form-select { ...`)
+- [ ] [Bug] Prefixes i.e. `-webkit-` are not included in JS-created `StyleSheet`
+- [ ] [Improvement] Nest pseudo elements/selectors, i.e. `:hover`, `:before`
+- [ ] [Improvement] Nest direct child selectors i.e. `div > a`
+- [ ] [Improvement] Remove 0's from floats i.e. rgb(0 0 0 / 0.5) -> rgb(0 0 0 / .5)
+- [ ] [Improvement] Add CSS file upload button
