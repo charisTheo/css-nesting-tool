@@ -12,7 +12,7 @@ import '@material/web/switch/switch'
 
 import { getMinifiedCSS, textToKBs } from './utils.js'
 
-const EXAMPLE_CSS_FILE_URL = 'https://github.githubassets.com/assets/primer-d6dcdf72e61d.css'
+const EXAMPLE_CSS_FILE_URL = 'https://www.gstatic.com/devrel-devsite/prod/v2969aa5c356a1994c35b6b6f94f2c6fc8c28faf9af75d026e0b265867da17793/web/css/app.css'
 
 async function onSubmit(fileUrl) {
   showLoadingIndicator()
@@ -57,6 +57,8 @@ document.querySelector('#paste-css-button').addEventListener('click', async () =
   hideLoadingIndicator()
 })
 
+// TODO prefixes (-webkit-) are not included in created StyleSheet
+// Example from google.com https://www.gstatic.com/og/_/ss/k=og.qtm.nko5ezWrvR8.L.W.O/m=qcwid/excm=qaaw,qadd,qaid,qein,qhaw,qhba,qhbr,qhch,qhga,qhid,qhin/d=1/ed=1/ct=zgms/rs=AA2YrTvccU9RE0PSvvoW1mAlAc12i4Ml8w
 function createStylesheetFromText(cssText) {
   const styleSheet = new CSSStyleSheet()
   styleSheet.replaceSync(cssText)
