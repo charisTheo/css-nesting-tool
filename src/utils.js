@@ -133,10 +133,11 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
     if (k === 'cssText') {
       return (
         minifyEnabled 
-          // remove spaces  i.e. rgb(255, 228, 253) -> rgb(255,228,253)
-          // TODO remove 0's from floats i.e. rgb(0 0 0 / 0.5) -> rgb(0 0 0 / .5)
-          ? object[k].trim().replaceAll(/(?<=(\d,|:|;))\s/g, '')
-          // otherwise add new line characters between declarations
+          // remove spaces, 0's from floats and px from 0px 
+          // i.e. `color: rgba(255, 228, 253, 0.5)` -> `color:rgba(255,228,253,.5)`
+          // i.e. margin: 20px 0px; -> margin:20px 0;
+          ? object[k].trim().replaceAll(/((?<=(\d,|:|;))\s)|(0(?=\.))|((?<=[^-0-9]0)px)/g, '')
+          // add new line characters between declarations
           : object[k].trim().replaceAll('; ', `;\n${isNested ? '    ' : '  '}`)
       )
 

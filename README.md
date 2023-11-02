@@ -42,7 +42,14 @@ npm run build && npm run serve
 ### TODOs
 
 - [ ] [Bug] Prefixes i.e. `-webkit-` are not included in JS-created `StyleSheet`
+
+```js
+var cssText = '.some-class { -webkit-border-radius: 4px; border-radius: 4px; color: #fff; }'
+var styleSheet = new CSSStyleSheet()
+await styleSheet.replace(cssText)
+styleSheet
+```
+
 - [ ] [Improvement] Nest pseudo elements/selectors, i.e. `:hover`, `:before`
 - [ ] [Improvement] Nest direct child selectors i.e. `div > a`
-- [ ] [Improvement] Remove 0's from floats i.e. rgb(0 0 0 / 0.5) -> rgb(0 0 0 / .5)
 - [ ] [Improvement] Add CSS file upload button
