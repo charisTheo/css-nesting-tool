@@ -97,7 +97,8 @@ async function fetchAndCreateStylesheet(url) {
 
 function displayResults(afterStyleSheet, before) {
   const minifyEnabled = document.querySelector('#minify-css-checkbox').checked
-  const after = getMinifiedCSS(afterStyleSheet, minifyEnabled)
+  const relaxedNesting = document.querySelector('#relaxed-nesting-checkbox').checked
+  const after = getMinifiedCSS(afterStyleSheet, minifyEnabled, relaxedNesting)
 
   const nestedCSSContainer = document.querySelector('#nested-css-container')
   nestedCSSContainer.removeAttribute('hidden')

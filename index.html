@@ -131,19 +131,24 @@
         }
       }
 
+      #options {
+        position: absolute;
+        right: 0;
+        bottom: -3rem;
+        
+        @media screen and (max-width: 767px) {
+          position: fixed;
+          bottom: 2rem;
+        }
+      }
       label:has(md-checkbox, md-switch) {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 1rem;
         --md-checkbox-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-focus-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-hover-outline-color: var(--md-sys-color-on-background);
-
-        &#minify-css-label {
-          position: absolute;
-          right: 0;
-          bottom: -3rem;
-        }
       }
       
       #comparison-container {
@@ -231,10 +236,16 @@
         <md-icon slot="leading-icon">css</md-icon>
       </md-filled-text-field>
 
-      <label id='minify-css-label'>
-        Minify Nested CSS
-        <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
-      </label>
+      <div id='options'>
+        <label id='minify-css-label'>
+          Minify Nested CSS
+          <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
+        </label>
+        <label id='relaxed-nesting-label'>
+          <a href='https://developer.chrome.com/blog/css-nesting-relaxed-syntax-update/' target='_blank'>Enable relaxed nesting</a>
+          <md-checkbox touch-target="wrapper" id='relaxed-nesting-checkbox' checked></md-checkbox>
+        </label>
+      </div>
 
       <div id='form-buttons-wrapper'>
         <md-filled-tonal-button disabled type="submit">

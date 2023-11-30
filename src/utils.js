@@ -104,7 +104,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
   );
 }
 
-function cssTextMapToString(object, isNested = false, minifyEnabled) {
+function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNesting) {
   const keys = Object.keys(object)
   
   return keys.map(k => {
@@ -142,7 +142,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
       )
 
     } else {
-      return `${addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${relaxedNesting ? '' : addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled, relaxedNesting).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -151,9 +151,10 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
  * 
  * @param {StyleSheet} styleSheet
  * @param {Boolean} minifyEnabled
+ * @param {Boolean} relaxedNesting
  * @returns 
  */
-export function getMinifiedCSS(styleSheet, minifyEnabled) {
+export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   const TOP_SELECTORS_MAP = {};
 
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
@@ -161,7 +162,7 @@ export function getMinifiedCSS(styleSheet, minifyEnabled) {
 
   rules.forEach(rule => mapCssTextInSelectors(rule, TOP_SELECTORS_MAP));
 
-  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
+  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled, relaxedNesting).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
   return cssTextString;
 }
