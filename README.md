@@ -41,15 +41,13 @@ npm run build && npm run serve
 
 ### TODOs
 
-- [ ] [Bug] Prefixes i.e. `-webkit-` are not included in JS-created `StyleSheet`
-
-```js
-var cssText = '.some-class { -webkit-border-radius: 4px; border-radius: 4px; color: #fff; }'
-var styleSheet = new CSSStyleSheet()
-await styleSheet.replace(cssText)
-styleSheet
-```
-
-- [ ] [Improvement] Nest pseudo elements/selectors, i.e. `:hover`, `:before`
-- [ ] [Improvement] Nest direct child selectors i.e. `div > a`
-- [ ] [Improvement] Add CSS file upload button
+- [ ] Convert rgb colors to hex - https://css-tricks.com/converting-color-spaces-in-javascript/
+- [ ] [Improvement] Nest media queries inside selectors
+    ```css
+    .foo {
+      @media (orientation: landscape) {
+      }
+    }
+    ```
+- [ ] Add a note about limitations like the bug below
+    - Removes comments, @charset declarations, browser vendor prefixes (i.e. -webkit-)

@@ -72,10 +72,9 @@ function mapCssTextInSelectors(rule, currentLevel) {
     return
   }
 
-  // * splitting between '>', '+' and space characters
+  // * splitting between '> <selector>', '+', ':<selector>' and space characters
   // if input is minified CSS still works because it is firstly parsed into a StyleSheet that adds spaces by default
-  const selectors = rule.selectorText.split(/\s/).filter(s => s);
-  // TODO if there is a > character, search for [parent] as in [parent] > [child] and add a new rule
+  const selectors = rule.selectorText.split(/(?<!>)\s|(?=:|>\s)/).filter(s => s);
   // i.e. currentLevel[parent] = {[child]: cssText}
   const ruleTopSelector = selectors[0];
 
@@ -142,7 +141,9 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
       )
 
     } else {
-      return `${relaxedNesting ? '' : addNestCharacter(isNested, minifyEnabled)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled, relaxedNesting).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      const isPseudoElement = k.startsWith(':') // for &:hover to be equal to li:hover when nested
+
+      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting, isPseudoElement)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled, relaxedNesting).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -167,8 +168,14 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   return cssTextString;
 }
 
-function addNestCharacter(isNested, minifyEnabled) {
-  return isNested ? (minifyEnabled ? '& ' : '\n\n  & ') : ''
+function addNestCharacter(isNested, minifyEnabled, relaxedNesting, isPseudoElement) {
+  const nestChar = isPseudoElement
+    ? '&'
+    : (relaxedNesting ? '' : '& ')
+
+  return isNested
+    ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)
+    : ''
 }
 function addSelector(selector, minifyEnabled, isNested) {
   // remove space from ': ' in '@media screen and (min-width: 768px)'
