@@ -110,16 +110,18 @@
       form #form-buttons-wrapper {
         display: flex;
         align-items: center;
+        gap: 12px;
 
         & [type='submit'] {
           flex: 1 0 100%;
         }
         & md-divider {
-          flex: 0 0.7 100%;
+          flex: 0 0 12%;
           rotate: 90deg;
         }
-        & #paste-css-button {
+        & [type='button'] {
           flex: 1 0 auto;
+
         }
       }
 
@@ -137,19 +139,25 @@
         }
       }
 
+      #options {
+        position: absolute;
+        right: 0;
+        bottom: -3rem;
+        
+        @media screen and (max-width: 767px) {
+          position: fixed;
+          bottom: 2rem;
+        }
+      }
+
       label:has(md-checkbox, md-switch) {
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 1rem;
         --md-checkbox-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-focus-outline-color: var(--md-sys-color-on-background);
         --md-checkbox-hover-outline-color: var(--md-sys-color-on-background);
-
-        &#minify-css-label {
-          position: absolute;
-          right: 0;
-          bottom: -3rem;
-        }
       }
 
       #comparison-container {
@@ -204,7 +212,7 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-c393b14b.js"></script>
+    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-03432992.js"></script>
   </head>
   <body>
     <md-linear-progress four-color indeterminate></md-linear-progress>
@@ -238,10 +246,16 @@
         <md-icon slot="leading-icon">css</md-icon>
       </md-filled-text-field>
 
-      <label id='minify-css-label'>
-        Minify Nested CSS
-        <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
-      </label>
+      <div id='options'>
+        <label id='minify-css-label'>
+          Minify Nested CSS
+          <md-checkbox touch-target="wrapper" id='minify-css-checkbox' checked></md-checkbox>
+        </label>
+        <label id='relaxed-nesting-label'>
+          <a href='https://developer.chrome.com/blog/css-nesting-relaxed-syntax-update/' target='_blank'>Enable relaxed nesting</a>
+          <md-checkbox touch-target="wrapper" id='relaxed-nesting-checkbox' checked></md-checkbox>
+        </label>
+      </div>
 
       <div id='form-buttons-wrapper'>
         <md-filled-tonal-button disabled type="submit">
@@ -253,6 +267,16 @@
         
         <md-filled-tonal-icon-button type='button' id='paste-css-button' aria-label='Paste CSS content'>
           <md-icon>content_paste</md-icon>
+        </md-filled-tonal-icon-button>
+
+        <input
+          type="file"
+          id="upload-file-input"
+          accept="text/css"
+          style="display:none"
+        />
+        <md-filled-tonal-icon-button type='button' id='upload-file-button' aria-label='Upload CSS file'>
+          <md-icon>upload</md-icon>
         </md-filled-tonal-icon-button>
       </div>
     </form>
@@ -295,5 +319,6 @@
     
     
     <script defer src="https://cdn.jsdelivr.net/gh/ireade/caniuse-embed/public/caniuse-embed.min.js"></script>
+    <script defer src="https://colorjs.io/dist/color.global.js"></script>
   </body>
 </html>
