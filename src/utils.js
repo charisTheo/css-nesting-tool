@@ -82,7 +82,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
   if (ruleTopSelector === rule.selectorText) {
     currentLevel[ruleTopSelector] = {
       ...(currentLevel[ruleTopSelector] || {}),
-      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + rule.style.cssText
+      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
     }
     return;
   }
@@ -189,6 +189,23 @@ function openBrackets(isNested, minifyEnabled) {
 }
 function closeBrackets(isNested, minifyEnabled) {
   return minifyEnabled ? '}' : `\n${isNested ? '  ' : ''}}\n`
+}
+
+/**
+ * ? https://colorjs.io/notebook/
+ * Shorten RGB colors to Hexadecimal
+ * TODO Add support for more formats: hsl, hsv, hwb, lch, lab, oklch, oklab, color - https://colorjs.io/docs/spaces
+ * @param {String} cssText 
+ * @returns 
+ */
+function shortenColors(cssText) {
+  const rgbStrings = cssText.match(/rgba?\(.*\)/g) || []
+  rgbStrings.forEach(c => {
+    const color = new Color(c)
+    const hex = color.toString({ format: 'hex' });
+    cssText = cssText.replace(c, hex)
+  })
+  return cssText
 }
 
 /**

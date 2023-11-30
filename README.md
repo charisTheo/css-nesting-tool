@@ -41,7 +41,6 @@ npm run build && npm run serve
 
 ### TODOs
 
-- [ ] Convert rgb colors to hex - https://css-tricks.com/converting-color-spaces-in-javascript/
 - [ ] [Improvement] Nest media queries inside selectors
     ```css
     .foo {
