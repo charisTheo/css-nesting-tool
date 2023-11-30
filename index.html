@@ -102,16 +102,18 @@
       form #form-buttons-wrapper {
         display: flex;
         align-items: center;
+        gap: 12px;
 
         & [type='submit'] {
           flex: 1 0 100%;
         }
         & md-divider {
-          flex: 0 0.7 100%;
+          flex: 0 0 12%;
           rotate: 90deg;
         }
-        & #paste-css-button {
+        & [type='button'] {
           flex: 1 0 auto;
+
         }
       }
 
@@ -244,6 +246,16 @@
         
         <md-filled-tonal-icon-button type='button' id='paste-css-button' aria-label='Paste CSS content'>
           <md-icon>content_paste</md-icon>
+        </md-filled-tonal-icon-button>
+
+        <input
+          type="file"
+          id="upload-file-input"
+          accept="text/css"
+          style="display:none"
+        />
+        <md-filled-tonal-icon-button type='button' id='upload-file-button' aria-label='Upload CSS file'>
+          <md-icon>upload</md-icon>
         </md-filled-tonal-icon-button>
       </div>
     </form>

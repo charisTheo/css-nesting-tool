@@ -57,7 +57,25 @@ document.querySelector('#paste-css-button').addEventListener('click', async () =
   hideLoadingIndicator()
 })
 
-// TODO prefixes (-webkit-) are not included in created StyleSheet
+document.querySelector('#upload-file-button').addEventListener('click', async () => {
+  document.querySelector('#upload-file-input').click();
+})
+document.querySelector('#upload-file-input').addEventListener('change', async e => {
+  showLoadingIndicator()
+  try {
+    const file = document.querySelector('#upload-file-input').files?.[0];
+    if (file) {
+      const cssText = await file.text()
+      const styleSheet = createStylesheetFromText(cssText)
+      displayResults(styleSheet, cssText)
+    }
+  } catch (error) {
+    alert('Failed to parse the CSS file');
+  }
+  hideLoadingIndicator()
+})
+
+// ! prefixes (-webkit-) are not included in created StyleSheet
 // Example from google.com https://www.gstatic.com/og/_/ss/k=og.qtm.nko5ezWrvR8.L.W.O/m=qcwid/excm=qaaw,qadd,qaid,qein,qhaw,qhba,qhbr,qhch,qhga,qhid,qhin/d=1/ed=1/ct=zgms/rs=AA2YrTvccU9RE0PSvvoW1mAlAc12i4Ml8w
 function createStylesheetFromText(cssText) {
   const styleSheet = new CSSStyleSheet()
