@@ -41,6 +41,7 @@ npm run build && npm run serve
 
 ### TODOs
 
+- [ ] Add hex convertion support for [more colors](https://colorjs.io/docs/spaces)
 - [ ] [Improvement] Nest media queries inside selectors
     ```css
     .foo {
