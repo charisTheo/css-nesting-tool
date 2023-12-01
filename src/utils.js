@@ -199,12 +199,18 @@ function closeBrackets(isNested, minifyEnabled) {
  * @returns 
  */
 function shortenColors(cssText) {
-  const rgbStrings = cssText.match(/rgba?\(.*\)/g) || []
-  rgbStrings.forEach(c => {
-    const color = new Color(c)
-    const hex = color.toString({ format: 'hex' });
-    cssText = cssText.replace(c, hex)
-  })
+  // TODO do not match variables inside rgb declarations, i.e. rgba(var(--somevariable))
+  const matches = cssText.matchAll(/rgba?\(.*?\)/g) || []
+  for (const match of matches) {
+    try {
+      const c = match[0]
+      const color = new Color(c)
+      const hex = color.toString({ format: 'hex' });
+      cssText = cssText.replace(c, hex)
+    } catch (err) {
+      console.log('🪲 | shortenColors | err:', err);
+    }
+  }
   return cssText
 }
 
