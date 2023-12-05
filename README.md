@@ -49,5 +49,3 @@ npm run build && npm run serve
       }
     }
     ```
-- [ ] Add a note about limitations like the bug below
-    - Removes comments, @charset declarations, browser vendor prefixes (i.e. -webkit-)
