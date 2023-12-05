@@ -103,7 +103,7 @@
         flex-direction: column;
         align-items: center;
         gap: 2rem;
-        margin: 4rem auto;
+        margin: 0rem auto 4rem;
         position: relative;
       }
 
@@ -112,6 +112,13 @@
         align-items: center;
         gap: 12px;
 
+        @media screen and (max-width: 767px) {
+          flex-wrap: wrap;
+
+          & md-divider {
+            display: none
+          }
+        }
         & [type='submit'] {
           flex: 1 0 100%;
         }
@@ -121,7 +128,6 @@
         }
         & [type='button'] {
           flex: 1 0 auto;
-
         }
       }
 
@@ -143,6 +149,7 @@
         position: absolute;
         right: 0;
         bottom: -3rem;
+        z-index: 1;
         
         @media screen and (max-width: 767px) {
           position: fixed;
@@ -202,7 +209,6 @@
             border-radius: inherit;
             color: var(--md-sys-color-on-background);
             background-color: var(--md-sys-color-surface);
-            border: none;
             padding: 1.5rem;
             width: 100%;
             max-width: 100%;
@@ -212,20 +218,28 @@
         }
       }
     </style>
-    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-32ba1293.js"></script>
+    <script type="module" crossorigin src="https://charistheo.github.io/css-nesting-tool/assets/index-b9ffad00.js"></script>
   </head>
   <body>
     <md-linear-progress four-color indeterminate></md-linear-progress>
 
     <div id='page-intro'>
       <h1>CSS Nesting tool</h1>
-      <p class='description'>
-        Shrink your CSS files and benefit from improving rendering performance and decreasing the impact on your users' data with CSS Nesting.
-        <br />
-        <a target='_blank' href='https://developer.chrome.com/articles/css-nesting/'>
-          Learn more about CSS Nesting
-        </a>
-      </p>
+      <div class='description'>
+        <p>
+          🚀 Shrink your CSS files and benefit from improving rendering performance and decreasing the impact on your users' data with CSS Nesting.
+        </p>
+        
+        <p>
+          📚 <a target='_blank' href='https://developer.chrome.com/articles/css-nesting/'>
+            Learn more about CSS Nesting
+          </a>
+        </p>
+
+        <p>
+          ℹ️ <i>This tool will remove comments, <code>@charset</code> declarations and browser vendor prefixes (i.e. <code>-webkit-</code>) while processing any CSS</i>
+        </p>
+      </div>
 
       <label>
         Show browser support
