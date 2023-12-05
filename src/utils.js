@@ -58,7 +58,10 @@ function mapCssTextInSelectors(rule, currentLevel) {
       } else if (identifier === '@property') {
         currentLevel[`${identifier} ${rule.name}`] = {cssText: rule[valueKey].replaceAll(/(@property.*{|})/g, '').trim()}
       } else {
-        currentLevel[`${identifier} ${rule[valueKey]}`] = {parentType: rule.type}
+        currentLevel[`${identifier} ${rule[valueKey]}`] = {
+          ...(currentLevel[`${identifier} ${rule[valueKey]}`] || {}),
+          parentType: rule.type
+        }
       }
 
       if (rule.cssRules) {
