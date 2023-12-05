@@ -118,3 +118,35 @@
       border-color: red;
   }
 }
+
+@media screen and (min-width: 767px) {
+  .nav {
+    height: 50vh;
+  }
+  .nav ul {
+    height: 50vh;
+  }
+  .nav ul li {
+    height: 50vh;
+  }
+  .nav li a {
+    height: 50vh;
+  }
+}
+
+
+@media screen and (min-width: 767px) {
+  .nav {
+    width: 50vh;
+  }
+  .nav ul {
+    width: 50vh;
+  }
+  .nav ul li {
+    width: 50vh;
+  }
+  .nav li a {
+    width: 50vh;
+  }
+}
+

@@ -39,12 +39,41 @@ npm start
 npm run build && npm run serve
 ```
 
-### TODOs
+### Further optimisations
 
-- [ ] [Improvement] Nest media queries inside selectors
+- [ ] Combine multiple property declarations
+
     ```css
-    .foo {
-      @media (orientation: landscape) {
-      }
+    .selector-1 {
+      padding-left: 20px; 
+      padding-right: 10px;
+      border-color: black;
+      border-width: 2px;
+      border-style: solid;
+    }
+
+    /* Merge into */
+    .selector-1 {
+      padding: unset 10px unset 20px;
+      border: 2px solid black;
+    }
+    ```
+
+- [ ] Merge multiple selectors with the same properties
+
+    ```css
+    .selector-1 {
+      padding: 20px;
+      margin: 20px;
+    }
+    .selector-2 {
+      padding: 20px;
+      margin: 20px;
+    }
+
+    /* Merge into */
+    .selector-1, .selector-2 {
+      padding: 20px;
+      margin: 20px;
     }
     ```
