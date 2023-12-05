@@ -194,13 +194,13 @@ function closeBrackets(isNested, minifyEnabled) {
 /**
  * ? https://colorjs.io/notebook/
  * Shorten RGB colors to Hexadecimal
- * TODO Add support for more formats: hsl, hsv, hwb, lch, lab, oklch, oklab, color - https://colorjs.io/docs/spaces
- * @param {String} cssText 
+ * ? Supported color spaces: https://colorjs.io/docs/spaces
+ * 
+ * @param {String} cssText
  * @returns 
  */
 function shortenColors(cssText) {
-  // TODO do not match variables inside rgb declarations, i.e. rgba(var(--somevariable))
-  const matches = cssText.matchAll(/rgba?\(.*?\)/g) || []
+  const matches = cssText.matchAll(/(rgba?|color|hsl|hsv|hwb|(ok)?lch|(ok)?lab)\((?!var\().*?\)/g) || []
   for (const match of matches) {
     try {
       const c = match[0]
