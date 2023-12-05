@@ -226,9 +226,5 @@ export function textToKBs(text) {
 }
 
 export function splitThousandsWithComma(number) {
-  const numberString = String(number);
-  const [integerPart, decimalPart] = numberString.split('.');
-  const integerPartWithCommas = integerPart.replace(/(?<!\B)\d{3}(?=\B)/g, ',');
-  const numberWithCommas = `${integerPartWithCommas}.${decimalPart}`;
-  return numberWithCommas;
+  return Number(number).toLocaleString('en-US')
 }
