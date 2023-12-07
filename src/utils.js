@@ -75,11 +75,21 @@ function mapCssTextInSelectors(rule, currentLevel) {
     return
   }
 
-  // * splitting between '> <selector>', '+', ':<selector>' and space characters
-  // if input is minified CSS still works because it is firstly parsed into a StyleSheet that adds spaces by default
-  const selectors = rule.selectorText.split(/(?<!>)\s|(?=:|>\s)/).filter(s => s);
+  // if multiple selectors, do not break them up i.e. `.s1, .s2 {}`
+  if (rule.selectorText.indexOf(',') !== -1) {
+    const ruleTopSelector = rule.selectorText;
+    currentLevel[ruleTopSelector] = {
+      ...(currentLevel[ruleTopSelector] || {}),
+      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
+    }
+    return
+  }
+
+  // * splitting between '> <selector>', '+' and space characters
+  // CSS input is parsed into a StyleSheet before this step so every selector has spaces where possible (unminified) i.e. we have `.s1 > .s2` instead of `.s1>.s2`
+  const selectors = rule.selectorText.split(/(?<!>)\s|(?=>\s)/).filter(s => s);
   // i.e. currentLevel[parent] = {[child]: cssText}
-  const ruleTopSelector = selectors[0];
+  const ruleTopSelector = selectors[0].trim();
 
   // no nesting needed as there is not second element in current selector
   if (ruleTopSelector === rule.selectorText) {
@@ -100,7 +110,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
       style: {
         cssText: rule.style.cssText,
       },
-      selectorText: selectors.join(' ')
+      selectorText: selectors.map(s => s.trim()).join(' ')
     }, 
     currentLevel[ruleTopSelector]
   );
@@ -144,9 +154,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
       )
 
     } else {
-      const isPseudoElement = k.startsWith(':') // for &:hover to be equal to li:hover when nested
-
-      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting, isPseudoElement)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], !skipNesting, minifyEnabled, relaxedNesting).join('')}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting && !Object.keys((object[k] || {})).length ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('')}${skipNesting && !Object.keys((object[k] || {})).length ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -171,10 +179,8 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   return cssTextString;
 }
 
-function addNestCharacter(isNested, minifyEnabled, relaxedNesting, isPseudoElement) {
-  const nestChar = isPseudoElement
-    ? '&'
-    : (relaxedNesting ? '' : '& ')
+function addNestCharacter(isNested, minifyEnabled, relaxedNesting) {
+  const nestChar = relaxedNesting ? '' : '& '
 
   return isNested
     ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)

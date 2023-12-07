@@ -77,3 +77,34 @@ npm run build && npm run serve
       margin: 20px;
     }
     ```
+
+    - Save each cssText in a secondary map that stores it as a key and its value are the keys to the map which is stored
+    - Each time before adding a new cssText to the primary map, check if current cssText exists in primary map
+    - If the primary map keys change, need to update the secondary map too
+
+- [ ] Merge selectors with same parent
+
+    ```css
+    .selector {
+      padding: 10px;
+    }
+    .selector.additional {
+      padding: 20px;
+    }
+    .selector.additional .child {
+      margin: 20px;
+    }
+
+    /* Merge into */
+    .selector {
+      padding: 10px;
+
+      &.additional {
+        padding: 20px;
+
+        & .child {
+          margin: 20px;
+        }
+      }
+    }
+    ```
