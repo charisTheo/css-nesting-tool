@@ -143,18 +143,22 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
     }
 
     if (k === 'cssText') {
+      const cssTextString = object[k].trim()
+
       return (
         minifyEnabled 
           // remove spaces, 0's from floats and px from 0px 
           // i.e. `color: rgba(255, 228, 253, 0.5)` -> `color:rgba(255,228,253,.5)`
           // i.e. margin: 20px 0px; -> margin:20px 0;
-          ? object[k].trim().replaceAll(/((?<=(\d,|:|;))\s)|(0(?=\.))|((?<=[^-0-9]0)px)/g, '')
+          ? cssTextString.replaceAll(/((?<=(\d,|:|;))\s)|(0(?=\.))|((?<=[^-0-9]0)px)/g, '')
           // add new line characters between declarations
-          : object[k].trim().replaceAll('; ', `;\n${isNested ? '    ' : '  '}`)
+          : cssTextString.replaceAll('; ', `;\n${isNested ? '    ' : '  '}`)
       )
 
     } else {
-      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting && !Object.keys((object[k] || {})).length ? '' : openBrackets(isNested, minifyEnabled)}${cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('')}${skipNesting && !Object.keys((object[k] || {})).length ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      const cssTextString = cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('');
+
+      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(selectorText, minifyEnabled, skipNesting)}${skipNesting && !Object.keys((object[k] || {})).length ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting && !Object.keys((object[k] || {})).length ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -173,6 +177,8 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   // console.log('🪲 | rules:', rules);
 
   rules.forEach(rule => mapCssTextInSelectors(rule, TOP_SELECTORS_MAP));
+
+  // TODO merge selectors that have the same cssText within TOP_SELECTORS_MAP
 
   const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled, relaxedNesting).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
