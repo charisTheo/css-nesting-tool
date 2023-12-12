@@ -158,7 +158,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
     } else {
       const cssTextString = cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('');
 
-      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(selectorText, minifyEnabled, skipNesting)}${skipNesting && !Object.keys((object[k] || {})).length ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting && !Object.keys((object[k] || {})).length ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
