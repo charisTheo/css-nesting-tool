@@ -7,7 +7,7 @@ const NON_SELECTOR_RULE_TYPES = {
   12: { identifier: '@supports', valueKey: 'conditionText' },
 }
 
-function mapCssTextInSelectors(rule, currentLevel) {
+function mapDescendantSelectorsToCssText(rule, currentLevel) {
   if (!rule.selectorText) {
   // It's a @rule
     if (NON_SELECTOR_RULE_TYPES[rule.type]) {
@@ -19,7 +19,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
         const ruleName = `@container ${rule.containerQuery}`
         currentLevel[ruleName] = {parentType: rule.type}
         Array.from(rule.cssRules).map(r => {
-          mapCssTextInSelectors(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
         return
       }
@@ -30,7 +30,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
         const ruleName = `@scope (${rule.start})${rule.end ? ` to (${rule.end})` : ''}`
         currentLevel[ruleName] = {parentType: rule.type}
         Array.from(rule.cssRules).map(r => {
-          mapCssTextInSelectors(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
         return
       }
@@ -46,7 +46,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
         const ruleName = `@layer ${rule.name}`
         currentLevel[ruleName] = {parentType: rule.type}
         Array.from(rule.cssRules).map(r => {
-          mapCssTextInSelectors(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
         return
       }
@@ -66,7 +66,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
 
       if (rule.cssRules) {
         Array.from(rule.cssRules).map(r => {
-          mapCssTextInSelectors(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
+          mapDescendantSelectorsToCssText(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
         })
       }
     } else {
@@ -85,14 +85,38 @@ function mapCssTextInSelectors(rule, currentLevel) {
     return
   }
 
-  // * splitting between '> <selector>', '+' and space characters
-  // CSS input is parsed into a StyleSheet before this step so every selector has spaces where possible (unminified) i.e. we have `.s1 > .s2` instead of `.s1>.s2`
-  const selectors = rule.selectorText.split(/(?<!>)\s|(?=>\s)/).filter(s => s);
+  const selectors = splitSelectorByDescendantCombinators(rule.selectorText)
   // i.e. currentLevel[parent] = {[child]: cssText}
   const ruleTopSelector = selectors[0].trim();
+  const isLastDescendant = ruleTopSelector === rule.selectorText
+
+  function mapSelectorPartToCssText(currentObject, part, isLastSelector) {
+    if (isLastDescendant && isLastSelector) {
+      currentObject[part] = {
+        ...(currentObject?.[part] || {}),
+        chain: true,
+        cssText: (currentObject?.[part]?.cssText || '') + shortenColors(rule.style.cssText)
+      }
+    } else {
+      currentObject.chain = true
+    }
+  }
+
+  selectors.forEach((s) => {
+    const parts = splitSimpleSelector(s)
+    const lastIndex = parts.length - 1
+    
+    var currentObject = (currentLevel[ruleTopSelector] || {})
+    for (var i = 0; i <= lastIndex; i++) {
+      const isLastSelector = i === lastIndex
+      const part = parts[i]
+      mapSelectorPartToCssText(currentObject, part, isLastSelector)
+      currentObject = currentObject[part]
+    }
+  })
 
   // no nesting needed as there is not second element in current selector
-  if (ruleTopSelector === rule.selectorText) {
+  if (isLastDescendant) {
     currentLevel[ruleTopSelector] = {
       ...(currentLevel[ruleTopSelector] || {}),
       cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
@@ -104,7 +128,7 @@ function mapCssTextInSelectors(rule, currentLevel) {
   if (!currentLevel[ruleTopSelector]) {
     currentLevel[ruleTopSelector] = {}
   }
-  mapCssTextInSelectors(
+  mapDescendantSelectorsToCssText(
     {
       ...rule,
       style: {
@@ -120,7 +144,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
   const keys = Object.keys(object)
   
   return keys.map(k => {
-    if (k === 'parentType') {
+    if (k === 'parentType' || k === 'chain') {
       return ''
     }
 
@@ -176,7 +200,7 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
   // console.log('🪲 | rules:', rules);
 
-  rules.forEach(rule => mapCssTextInSelectors(rule, TOP_SELECTORS_MAP));
+  rules.forEach(rule => mapDescendantSelectorsToCssText(rule, TOP_SELECTORS_MAP));
 
   // TODO merge selectors that have the same cssText within TOP_SELECTORS_MAP
 
@@ -239,4 +263,27 @@ export function textToKBs(text) {
 
 export function splitThousandsWithComma(number) {
   return Number(number).toLocaleString('en-US')
+}
+
+
+/**
+ * * splitting between '> <selector>' and space characters
+ * ? CSS input is parsed into a StyleSheet before this step so every selector has spaces where possible (unminified)
+ * ? i.e. we have `.s1 > .s2` instead of `.s1>.s2`
+ * @param {String} selectorText 
+ * @returns {Array<String>}
+ */
+function splitSelectorByDescendantCombinators(selectorText) {
+  return selectorText.split(/(?<!>)\s|(?=>\s)/).filter(s => s);
+}
+
+/**
+ * This function should only run after selectors have been split by space
+ * * i.e. `div.class#id:hover[disabled]:not([disabled])`
+ * * becomes: `['div', '.class', '#id', ':hover', '[disabled]', ':not([disabled])']`
+ * @param {String} selectorText
+ * @returns {Array<String>}
+ */
+function splitSimpleSelector(selectorText) {
+  return selectorText.split(/(?=(?<!\()(:|\[])|\.|#)/g);
 }
