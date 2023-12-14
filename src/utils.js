@@ -90,44 +90,49 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
   const ruleTopSelector = selectors[0].trim();
   const isLastDescendant = ruleTopSelector === rule.selectorText
 
-  function mapSelectorPartToCssText(currentObject, part, isLastSelector) {
-    if (isLastDescendant && isLastSelector) {
-      currentObject[part] = {
-        ...(currentObject?.[part] || {}),
-        chain: true,
-        cssText: (currentObject?.[part]?.cssText || '') + shortenColors(rule.style.cssText)
-      }
-    } else {
-      currentObject.chain = true
-    }
-  }
-
-  selectors.forEach((s) => {
-    const parts = splitSimpleSelector(s)
-    const lastIndex = parts.length - 1
-    
-    var currentObject = (currentLevel[ruleTopSelector] || {})
-    for (var i = 0; i <= lastIndex; i++) {
-      const isLastSelector = i === lastIndex
-      const part = parts[i]
-      mapSelectorPartToCssText(currentObject, part, isLastSelector)
-      currentObject = currentObject[part]
-    }
-  })
-
   // no nesting needed as there is not second element in current selector
-  if (isLastDescendant) {
+  if (isLastDescendant && !splitSimpleSelector(ruleTopSelector).length) {
     currentLevel[ruleTopSelector] = {
       ...(currentLevel[ruleTopSelector] || {}),
       cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
     }
     return;
   }
+  
+  const parts = splitSimpleSelector(ruleTopSelector)
+  const lastIndex = parts.length - 1
+  
+  var currentPartLevel = currentLevel
+
+  for (var i = 0; i <= lastIndex; i++) {
+    const isLastSelector = i === lastIndex
+    const part = parts[i]
+    if (!currentPartLevel[part]) {
+      currentPartLevel[part] = {}
+    }
+
+    if (isLastDescendant && isLastSelector) {
+      currentPartLevel[part] = {
+        ...currentPartLevel[part],
+        cssText: (currentPartLevel[part].cssText || '') + shortenColors(rule.style.cssText)
+      }
+    }
+    if (i !== 0) {
+      currentPartLevel.chain = true
+    }
+
+    currentPartLevel = currentPartLevel[part]
+  }
+
+  if (isLastDescendant) {
+    return
+  }
 
   selectors.shift();
-  if (!currentLevel[ruleTopSelector]) {
-    currentLevel[ruleTopSelector] = {}
-  }
+
+  // if (!currentLevel[ruleTopSelector]) {
+  //   currentLevel[ruleTopSelector] = {}
+  // }
   mapDescendantSelectorsToCssText(
     {
       ...rule,
@@ -136,7 +141,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
       },
       selectorText: selectors.map(s => s.trim()).join(' ')
     }, 
-    currentLevel[ruleTopSelector]
+    currentLevel[ruleTopSelector] || currentPartLevel
   );
 }
 
@@ -150,13 +155,13 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
 
     var skipNesting = false
     // If current selector doesn't have any CSS rules AND is not a media query or keyframes declaration
-    if (!object[k]?.cssText && k.trim().indexOf('@') !== 0) {
+    if (!object[k]?.cssText && k.trim().indexOf('@') !== 0 && !object[k].chain) {
       // * if there is no cssText key in this set of keys, do not nest
       // i.e. turn `& li { & a { ... } }` into `& li a { ... }`
       skipNesting = true
     }
 
-    if (object[k]?.cssText === '' && Object.keys(object[k] || {}).length < 2) {
+    if (object[k]?.cssText === '' && Object.keys(object[k] || {}).filter(_ => _ !== 'chain').length < 2) {
       // * skip empty CSS rules with no declarations
       return ''
     }
@@ -182,7 +187,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
     } else {
       const cssTextString = cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('');
 
-      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -209,8 +214,8 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
   return cssTextString;
 }
 
-function addNestCharacter(isNested, minifyEnabled, relaxedNesting) {
-  const nestChar = relaxedNesting ? '' : '& '
+function addNestCharacter(isNested, minifyEnabled, relaxedNesting, chain) {
+  const nestChar = chain ? '&' : (relaxedNesting ? '' : '& ')
 
   return isNested
     ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)
@@ -285,5 +290,5 @@ function splitSelectorByDescendantCombinators(selectorText) {
  * @returns {Array<String>}
  */
 function splitSimpleSelector(selectorText) {
-  return selectorText.split(/(?=(?<!\()(:|\[])|\.|#)/g);
+  return selectorText.split(/(?=(?<!\()(:|\[])|\.|#)/g).filter(_ => _);
 }
