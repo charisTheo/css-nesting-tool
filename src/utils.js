@@ -30,7 +30,6 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
 
       //? Scope rules
       if (rule instanceof CSSScopeRule) {
-        //! console.log(rule) throws an error: https://bugs.chromium.org/p/chromium/issues/detail?id=1498448
         const ruleName = `@scope (${rule.start})${rule.end ? ` to (${rule.end})` : ''}`
         currentLevel[ruleName] = {parentType: rule.type}
         Array.from(rule.cssRules).map(r => {
