@@ -330,10 +330,12 @@ function splitSelectorByDescendantCombinators(selectorText) {
 /**
  * This function should only run after selectors have been split by space
  * * i.e. `div.class#id:hover[disabled]:not([disabled])`
- * * becomes: `['div', '.class', '#id', ':hover', '[disabled]', ':not([disabled])']`
+ * * becomes: ['div', '.class', '#id', ':hover', '[disabled]', ':not([disabled])']
+ * * i.e. `> :not(figcaption)` stays as it is
+ * * i.e. `> button[type='submit']:disabled` becomes ["> button[type='submit']", ':disabled']
  * @param {String} selectorText
  * @returns {Array<String>}
  */
 function splitSimpleSelector(selectorText) {
-  return selectorText.split(/(?=(?<!\():?:|\[]|\.|#)/g).filter(_ => _ && _ !== ':');
+  return selectorText.split(/(?=(?<!\(|>\s):?:|\[]|\.|#)/g).filter(_ => _ && _ !== ':');
 }
