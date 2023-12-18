@@ -39,27 +39,9 @@ npm start
 npm run build && npm run serve
 ```
 
-### Further optimisations
+### CSS Optimisations
 
-- [ ] Combine multiple property declarations
-
-    ```css
-    .selector-1 {
-      padding-left: 20px; 
-      padding-right: 10px;
-      border-color: black;
-      border-width: 2px;
-      border-style: solid;
-    }
-
-    /* Merge into */
-    .selector-1 {
-      padding: unset 10px unset 20px;
-      border: 2px solid black;
-    }
-    ```
-
-- [ ] Merge multiple selectors with the same properties
+- [x] Merge multiple selectors with the same properties
 
     ```css
     .selector-1 {
@@ -70,19 +52,19 @@ npm run build && npm run serve
       padding: 20px;
       margin: 20px;
     }
+    .selector-3, .selector-4 {
+      padding: 20px;
+      margin: 20px;
+    }
 
     /* Merge into */
-    .selector-1, .selector-2 {
+    .selector-1, .selector-2, .selector-3, .selector-4 {
       padding: 20px;
       margin: 20px;
     }
     ```
 
-    - Save each cssText in a secondary map that stores it as a key and its value are the keys to the map which is stored
-    - Each time before adding a new cssText to the primary map, check if current cssText exists in primary map
-    - If the primary map keys change, need to update the secondary map too
-
-- [ ] Merge selectors with same parent
+- [x] Merge selectors with same parent
 
     ```css
     .selector {

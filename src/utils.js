@@ -8,6 +8,10 @@ const NON_SELECTOR_RULE_TYPES = {
 }
 
 function mapDescendantSelectorsToCssText(rule, currentLevel) {
+  if (rule === null) {
+    return
+  }
+
   if (!rule.selectorText) {
   // It's a @rule
     if (NON_SELECTOR_RULE_TYPES[rule.type]) {
@@ -130,9 +134,6 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
 
   selectors.shift();
 
-  // if (!currentLevel[ruleTopSelector]) {
-  //   currentLevel[ruleTopSelector] = {}
-  // }
   mapDescendantSelectorsToCssText(
     {
       ...rule,
@@ -157,7 +158,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
     // If current selector doesn't have any CSS rules AND is not a media query or keyframes declaration
     if (!object[k]?.cssText && k.trim().indexOf('@') !== 0 && !object[k].chain) {
       // * if there is no cssText key in this set of keys, do not nest
-      // i.e. turn `& li { & a { ... } }` into `& li a { ... }`
+      // i.e. turn `li { & a { ... } }` into `li a { ... }`
       skipNesting = true
     }
 
@@ -185,9 +186,17 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
       )
 
     } else {
-      const cssTextString = cssTextMapToString(object[k], Object.keys((object[k] || {})).length, minifyEnabled, relaxedNesting).join('');
+      const cssTextString = cssTextMapToString(
+        object[k],
+        Boolean(Object.keys((object[k] || {})).filter(_ => _ !== 'chain').length),
+        minifyEnabled,
+        relaxedNesting
+      ).join('');
+      
+      // do not add the '&' character in these cases
+      relaxedNesting = relaxedNesting || k.startsWith('>')
 
-      return `${addNestCharacter(isNested, minifyEnabled, k.startsWith('>') || relaxedNesting, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${addNestCharacter(isNested, minifyEnabled, relaxedNesting, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -204,29 +213,66 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
 
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
   // console.log('🪲 | rules:', rules);
+  
+  mergeCommonCssTextRules(rules)
 
   rules.forEach(rule => mapDescendantSelectorsToCssText(rule, TOP_SELECTORS_MAP));
-
-  // TODO merge selectors that have the same cssText within TOP_SELECTORS_MAP
 
   const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled, relaxedNesting).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
   return cssTextString;
 }
 
+/**
+ * Finds and merges rules with common CSS by updating the array supplied as an argument
+ * @param {Array} rules 
+ */
+function mergeCommonCssTextRules(rules) {
+  const COMMON_CSS_RULES_MAP = {}
+  // * find and save selectors with common cssText
+  rules.forEach((rule, index) => {
+    if (!rule?.style?.cssText || !rule?.selectorText) {
+      return
+    }
+
+    // save indexes of the `rules` array
+    COMMON_CSS_RULES_MAP[rule.style.cssText] = [
+      ...(COMMON_CSS_RULES_MAP[rule.style.cssText] || []),
+      index
+    ]
+  })
+  
+  // * merge selectors with common cssText
+  Object.keys(COMMON_CSS_RULES_MAP).forEach(k => {
+    const rulesIndexes = COMMON_CSS_RULES_MAP[k]
+    if (rulesIndexes.length < 2) {
+      return
+    }
+
+    // pick one index to merge every other rule into that
+    const markerIndex = rulesIndexes.shift();
+    rulesIndexes.forEach(i => {
+      rules[markerIndex].selectorText += `, ${rules[i].selectorText}`
+      // need to keep merged rules in the array so that indexes can still work
+      // mark merged rules as null and will be ignored in following operations
+      rules[i] = null
+    })
+  })
+}
+
 function addNestCharacter(isNested, minifyEnabled, relaxedNesting, chain) {
-  const nestChar = chain ? '&' : (relaxedNesting ? '' : '& ')
+  const nestChar = chain ? '&' : (relaxedNesting ? ' ' : '& ')
 
   return isNested
     ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)
     : ''
 }
-function addSelector(selector, minifyEnabled, isNested) {
+function addSelector(selector, minifyEnabled) {
   // remove space from ': ' in '@media screen and (min-width: 768px)'
+  // and space from commas in selectors i.e. '.s1, .s2'
   return (minifyEnabled 
-    ? selector.replaceAll(/(?<=:)\s/g, '')
+    ? selector.replaceAll(/(?<=(:|,))\s/g, '')
     : selector + ' ')
-    + (isNested ? ' ' : '')
 }
 function openBrackets(isNested, minifyEnabled) {
   return minifyEnabled ? '{' : `{\n  ${isNested ? '  ' : ''}`
@@ -290,5 +336,5 @@ function splitSelectorByDescendantCombinators(selectorText) {
  * @returns {Array<String>}
  */
 function splitSimpleSelector(selectorText) {
-  return selectorText.split(/(?=(?<!\()(:|\[])|\.|#)/g).filter(_ => _);
+  return selectorText.split(/(?=(?<!\():?:|\[]|\.|#)/g).filter(_ => _ && _ !== ':');
 }
