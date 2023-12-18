@@ -52,6 +52,7 @@ document.querySelector('#paste-css-button').addEventListener('click', async () =
     const styleSheet = createStylesheetFromText(cssText)
     displayResults(styleSheet, cssText)
   } catch (error) {
+    console.log('🪲 | paste-css-button | error:', error);
     alert('Failed to parse CSS from your clipboard');
   }
   hideLoadingIndicator()
@@ -70,6 +71,7 @@ document.querySelector('#upload-file-input').addEventListener('change', async e 
       displayResults(styleSheet, cssText)
     }
   } catch (error) {
+    console.log('🪲 | upload-file-input | error:', error);
     alert('Failed to parse the CSS file');
   }
   hideLoadingIndicator()
@@ -90,6 +92,7 @@ async function fetchAndCreateStylesheet(url) {
     styleSheet.replaceSync(cssText)
     return [styleSheet, cssText]
   } catch (err) {
+    console.log('🪲 | fetchAndCreateStylesheet | err:', err);
     alert('Failed to fetch CSS file')
   }
   return null
