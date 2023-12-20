@@ -84,7 +84,7 @@ npm run build && npm run serve
       &.additional {
         padding: 20px;
 
-        & .child {
+        .child {
           margin: 20px;
         }
       }
