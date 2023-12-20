@@ -333,9 +333,10 @@ function splitSelectorByDescendantCombinators(selectorText) {
  * * becomes: ['div', '.class', '#id', ':hover', '[disabled]', ':not([disabled])']
  * * i.e. `> :not(figcaption)` stays as it is
  * * i.e. `> button[type='submit']:disabled` becomes ["> button[type='submit']", ':disabled']
+ * * i.e. `div:not(.class)` becomes ['div', ':not(.class)']
  * @param {String} selectorText
  * @returns {Array<String>}
  */
 function splitSimpleSelector(selectorText) {
-  return selectorText.split(/(?=(?<!\(|>\s):?:|\[]|\.|#)/g).filter(_ => _ && _ !== ':');
+  return selectorText.split(/(?=(?<!\(|>\s)(:?:|\[]|\.|#))/g).filter(_ => _ && ![':', '#', '.'].find(c => c === _));
 }
