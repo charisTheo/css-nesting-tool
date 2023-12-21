@@ -145,7 +145,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
   );
 }
 
-function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNesting) {
+function cssTextMapToString(object, isNested = false, minifyEnabled) {
   const keys = Object.keys(object)
   
   return keys.map(k => {
@@ -189,13 +189,10 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
         object[k],
         Boolean(Object.keys((object[k] || {})).filter(_ => _ !== 'chain').length),
         minifyEnabled,
-        relaxedNesting
       ).join('');
       
-      // do not add the '&' character in these cases
-      relaxedNesting = relaxedNesting || k.startsWith('>')
 
-      return `${addNestCharacter(isNested, minifyEnabled, relaxedNesting, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      return `${addNestCharacter(isNested && !k.startsWith('>'), minifyEnabled, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
     }
   })
 }
@@ -204,10 +201,9 @@ function cssTextMapToString(object, isNested = false, minifyEnabled, relaxedNest
  * 
  * @param {StyleSheet} styleSheet
  * @param {Boolean} minifyEnabled
- * @param {Boolean} relaxedNesting
  * @returns 
  */
-export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
+export function getMinifiedCSS(styleSheet, minifyEnabled) {
   const TOP_SELECTORS_MAP = {};
 
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
@@ -217,7 +213,7 @@ export function getMinifiedCSS(styleSheet, minifyEnabled, relaxedNesting) {
 
   rules.forEach(rule => mapDescendantSelectorsToCssText(rule, TOP_SELECTORS_MAP));
 
-  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled, relaxedNesting).join('');
+  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
   return cssTextString;
 }
@@ -259,8 +255,8 @@ function mergeCommonCssTextRules(rules) {
   })
 }
 
-function addNestCharacter(isNested, minifyEnabled, relaxedNesting, chain) {
-  const nestChar = chain ? '&' : (relaxedNesting ? ' ' : '& ')
+function addNestCharacter(isNested, minifyEnabled, chain) {
+  const nestChar = chain ? '&' : ' '
 
   return isNested
     ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)

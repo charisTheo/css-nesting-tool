@@ -137,16 +137,19 @@
 
 @media screen and (min-width: 767px) {
   .nav {
-    width: 50vh;
+    width: 10vh;
   }
   .nav ul {
-    width: 50vh;
+    width: 10vh;
   }
   .nav ul li {
-    width: 50vh;
+    width: 10vh;
   }
-  .nav li a {
+  .nav ul li a {
     width: 50vh;
   }
 }
 
+.a.b .c {
+  padding: 10px;
+}
