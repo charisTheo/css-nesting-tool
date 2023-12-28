@@ -195,10 +195,10 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
       const nestCharacter = addNestCharacter(isChild, isNested && object.cssText, minifyEnabled)
       const selector = k.startsWith('>') ? '' : addSelector(k, minifyEnabled)
 
-      const openingBrackets = (skipNesting || object.chain) ? '' : openBrackets(isNested, minifyEnabled)
-      const closingBrackets = (skipNesting || object.chain) ? '' : closeBrackets(isNested, minifyEnabled)
+      const openingBrackets = openBrackets(skipNesting || object.chain, object[k].cssText, isNested, minifyEnabled)
+      const closingBrackets = closeBrackets(skipNesting || object.chain, object[k].cssText, isNested, minifyEnabled)
 
-      // TODO remove any spaces after closing brackets '} '
+      // TODO remove any spaces after closing brackets '} ' and '; '
       return `${nestCharacter}${selector}${openingBrackets}${cssTextString}${closingBrackets}`.replaceAll(';}', '}')
     }
   })
@@ -273,10 +273,16 @@ function addSelector(selector, minifyEnabled) {
     ? selector.replaceAll(/(?<=(:|,))\s/g, '')
     : selector
 }
-function openBrackets(isNested, minifyEnabled) {
+function openBrackets(isSelectorOnly, selectorHasCss, isNested, minifyEnabled) {
+  if (isSelectorOnly && !selectorHasCss) {
+    return ''
+  }
   return minifyEnabled ? '{' : `{\n  ${isNested ? '  ' : ''}`
 }
-function closeBrackets(isNested, minifyEnabled) {
+function closeBrackets(isSelectorOnly, selectorHasCss, isNested, minifyEnabled) {
+  if (isSelectorOnly && !selectorHasCss) {
+    return ''
+  }
   return minifyEnabled ? '}' : `\n${isNested ? '  ' : ''}}\n`
 }
 
@@ -338,5 +344,5 @@ function splitSelectorByDescendantCombinators(selectorText) {
  * @returns {Array<String>}
  */
 function splitSimpleSelector(selectorText) {
-  return selectorText.split(/(?=(?<!\(|>\s)(:?:|\[]|\.|#))/g).filter(_ => _ && ![':', '#', '.'].find(c => c === _));
+  return selectorText.split(/(?=(?<!\(|>\s)(:?:|\[]|\.|#))/g).filter(_ => _ && ![':', '::', '#', '.'].find(c => c === _));
 }

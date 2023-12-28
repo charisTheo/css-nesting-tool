@@ -156,8 +156,16 @@
 .a.b .c {
   padding: 10px;
 }
+.a.d {
+  padding: 30px;
+}
 
-/* TODO Fix */
-.custom-radio-button::after {
-  background: #3f51b5;
+
+/* TODO fix */
+.a .c {
+  padding: 10px;
+}
+
+.a:after {
+  margin: 1rem;
 }
