@@ -150,6 +150,14 @@
   }
 }
 
+.a {
+  padding: 20px
+}
 .a.b .c {
   padding: 10px;
+}
+
+/* TODO Fix */
+.custom-radio-button::after {
+  background: #3f51b5;
 }

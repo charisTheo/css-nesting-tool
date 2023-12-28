@@ -155,7 +155,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
 
     var skipNesting = false
     // If current selector doesn't have any CSS rules AND is not a media query or keyframes declaration
-    if (!object[k]?.cssText && k.trim().indexOf('@') !== 0 && !object[k].chain) {
+    if (!object[k]?.cssText && k.trim().indexOf('@') !== 0 && !object.chain) {
       // * if there is no cssText key in this set of keys, do not nest
       // i.e. turn `li { & a { ... } }` into `li a { ... }`
       skipNesting = true
@@ -191,8 +191,15 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
         minifyEnabled,
       ).join('');
       
+      const isChild = isNested && !object.chain
+      const nestCharacter = addNestCharacter(isChild, isNested && object.cssText, minifyEnabled)
+      const selector = k.startsWith('>') ? '' : addSelector(k, minifyEnabled)
 
-      return `${addNestCharacter(isNested && !k.startsWith('>'), minifyEnabled, object.chain)}${addSelector(k, minifyEnabled, skipNesting)}${skipNesting ? '' : openBrackets(isNested, minifyEnabled)}${cssTextString}${skipNesting ? '' : closeBrackets(isNested, minifyEnabled)}`.replaceAll(';}', '}')
+      const openingBrackets = (skipNesting || object.chain) ? '' : openBrackets(isNested, minifyEnabled)
+      const closingBrackets = (skipNesting || object.chain) ? '' : closeBrackets(isNested, minifyEnabled)
+
+      // TODO remove any spaces after closing brackets '} '
+      return `${nestCharacter}${selector}${openingBrackets}${cssTextString}${closingBrackets}`.replaceAll(';}', '}')
     }
   })
 }
@@ -255,19 +262,16 @@ function mergeCommonCssTextRules(rules) {
   })
 }
 
-function addNestCharacter(isNested, minifyEnabled, chain) {
-  const nestChar = chain ? '&' : ' '
-
-  return isNested
-    ? (minifyEnabled ? nestChar : `\n\n  ${nestChar}`)
-    : ''
+function addNestCharacter(isChild, isChainedAndNested, minifyEnabled) {
+  const nestChar = isChild ? ' ' : isChainedAndNested ? '&' : ''
+  return minifyEnabled || !isChainedAndNested ? nestChar : `\n\n  ${nestChar}`
 }
 function addSelector(selector, minifyEnabled) {
   // remove space from ': ' in '@media screen and (min-width: 768px)'
   // and space from commas in selectors i.e. '.s1, .s2'
-  return (minifyEnabled 
+  return minifyEnabled 
     ? selector.replaceAll(/(?<=(:|,))\s/g, '')
-    : selector + ' ')
+    : selector
 }
 function openBrackets(isNested, minifyEnabled) {
   return minifyEnabled ? '{' : `{\n  ${isNested ? '  ' : ''}`
