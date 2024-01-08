@@ -145,7 +145,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
   );
 }
 
-function cssTextMapToString(object, isNested = false, minifyEnabled) {
+function cssTextsFromSelectorsMap(object, isNested = false, minifyEnabled) {
   const keys = Object.keys(object)
   
   return keys.map(k => {
@@ -187,7 +187,7 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
 
     } else {
       const hasSingleNestedChild = Object.keys((object[k] || {})).filter(_ => _ !== 'chain' && _ !== 'cssText').length <= 1
-      const cssTextString = cssTextMapToString(object[k], !hasSingleNestedChild, minifyEnabled).join('');
+      const cssTextString = cssTextsFromSelectorsMap(object[k], !hasSingleNestedChild, minifyEnabled).join('');
       
       const nestCharacter = addNestCharacter(!object[k].chain, (isNested || !!object.cssText), minifyEnabled)
       const selector = k.startsWith('>') ? '' : addSelector(k, minifyEnabled)
@@ -207,24 +207,25 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
  * @param {Boolean} minifyEnabled
  * @returns 
  */
-export function getMinifiedCSS(styleSheet, minifyEnabled) {
-  const TOP_SELECTORS_MAP = {};
+export function getNestedCSS(styleSheet, minifyEnabled) {
+  const SELECTORS_MAP = {}
 
-  const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules);
-  // console.log('🪲 | rules:', rules);
+  const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules)
+  // console.log('🪲 | rules:', rules)
   
   mergeCommonCssTextRules(rules)
 
-  rules.forEach(rule => mapDescendantSelectorsToCssText(rule, TOP_SELECTORS_MAP));
+  rules.forEach(rule => mapDescendantSelectorsToCssText(rule, SELECTORS_MAP))
 
-  const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
-  // console.log('🪲 | cssTextString:', cssTextString);
+  const cssTextStringArray = cssTextsFromSelectorsMap(SELECTORS_MAP, false, minifyEnabled)
+  const cssTextString = cssTextStringArray.join('')
+  // console.log('🪲 | cssTextString:', cssTextString)
   return minifyEnabled ? removeSpacesAndSemiColons(cssTextString) : cssTextString
 }
 
 /**
- * Finds and merges rules with common CSS by updating the array supplied as an argument
- * @param {Array} rules 
+ * Finds and merges rules with common CSS by mutating a given array
+ * @param {Array} rules
  */
 function mergeCommonCssTextRules(rules) {
   const COMMON_CSS_RULES_MAP = {}

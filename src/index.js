@@ -10,7 +10,7 @@ import '@material/web/divider/divider'
 import '@material/web/fab/fab'
 import '@material/web/switch/switch'
 
-import { getMinifiedCSS, splitThousandsWithComma, textToKBs } from './utils.js'
+import { getNestedCSS, splitThousandsWithComma, textToKBs } from './utils.js'
 
 const EXAMPLE_CSS_FILE_URL = 'https://www.gstatic.com/devrel-devsite/prod/v2969aa5c356a1994c35b6b6f94f2c6fc8c28faf9af75d026e0b265867da17793/web/css/app.css'
 
@@ -100,7 +100,7 @@ async function fetchAndCreateStylesheet(url) {
 
 function displayResults(afterStyleSheet, before) {
   const minifyEnabled = document.querySelector('#minify-css-checkbox').checked
-  const after = getMinifiedCSS(afterStyleSheet, minifyEnabled)
+  const after = getNestedCSS(afterStyleSheet, minifyEnabled)
 
   const nestedCSSContainer = document.querySelector('#nested-css-container')
   nestedCSSContainer.removeAttribute('hidden')
