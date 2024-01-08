@@ -10,7 +10,7 @@ import '@material/web/divider/divider'
 import '@material/web/fab/fab'
 import '@material/web/switch/switch'
 
-import { getMinifiedCSS, textToKBs } from './utils.js'
+import { getMinifiedCSS, splitThousandsWithComma, textToKBs } from './utils.js'
 
 const EXAMPLE_CSS_FILE_URL = 'https://www.gstatic.com/devrel-devsite/prod/v2969aa5c356a1994c35b6b6f94f2c6fc8c28faf9af75d026e0b265867da17793/web/css/app.css'
 
@@ -114,8 +114,8 @@ function displayResults(afterStyleSheet, before) {
   const changePolarity = percentageChange > 0 ? '+' : ''
   const changePolarityColor = Number(percentageChange) === 0 ? '' : percentageChange < 0 ? 'green-text' : 'red-text'
   const percentageChangeString = `<span class="${changePolarityColor}">${changePolarity}${percentageChange}%</span>`
-  const beforeHtmlString = `Original: ${beforeKBs} KBs`
-  const afterHtmlString = `Nested: ${afterKBs} KBs (${percentageChangeString})`
+  const beforeHtmlString = `Original: ${splitThousandsWithComma(beforeKBs)} KBs`
+  const afterHtmlString = `Nested: ${splitThousandsWithComma(afterKBs)} KBs (${percentageChangeString})`
   nestedCSSContainer.querySelector('.before .file-weight').innerHTML = beforeHtmlString
   nestedCSSContainer.querySelector('.after .file-weight').innerHTML = afterHtmlString
 

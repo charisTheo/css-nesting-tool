@@ -299,7 +299,7 @@ function removeSpacesAndSemiColons(cssText) {
  * ? https://colorjs.io/notebook/
  * Shorten RGB colors to Hexadecimal
  * ? Supported color spaces: https://colorjs.io/docs/spaces
- * 
+ * TODO throws error on variable colors: `--color: rgba(19, 19, 19);`
  * @param {String} cssText
  * @returns 
  */
@@ -320,12 +320,17 @@ function shortenColors(cssText) {
 
 /**
  * @param {String} text - i.e. 'abababababababa'
- * @returns {String} - '15' (KBs)
+ * @returns {Number} - float in KBs i.e. 12.34
  */
 export function textToKBs(text) {
-  return splitThousandsWithComma((text.length / 1024).toFixed(2))
+  return (text.length / 1024).toFixed(2)
 }
 
+/**
+ * Adds a comma after each thousand to improve readability of large numbers
+ * @param {Number} number i.e 1686.55
+ * @returns {String} i.e. 1,686.55
+ */
 export function splitThousandsWithComma(number) {
   return Number(number).toLocaleString('en-US')
 }
