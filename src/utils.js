@@ -101,10 +101,10 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
     }
     return;
   }
-  
+
   const parts = splitSimpleSelector(ruleTopSelector)
   const lastIndex = parts.length - 1
-  
+
   var currentPartLevel = currentLevel
 
   for (var i = 0; i <= lastIndex; i++) {
@@ -121,7 +121,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
       }
     }
     if (i !== 0) {
-      currentPartLevel.chain = true
+      currentPartLevel[part].chain = true
     }
 
     currentPartLevel = currentPartLevel[part]
@@ -173,33 +173,30 @@ function cssTextMapToString(object, isNested = false, minifyEnabled) {
 
     if (k === 'cssText') {
       const cssTextString = object[k].trim()
+      const hasSiblings = Object.keys((object || {})).filter(_ => _ !== 'chain' && _ !== 'cssText').length >= 1
 
-      return (
+      return (hasSiblings ? '' : '{') + (
         minifyEnabled 
           // remove spaces, 0's from floats and px from 0px 
           // i.e. `color: rgba(255, 228, 253, 0.5)` -> `color:rgba(255,228,253,.5)`
           // i.e. margin: 20px 0px; -> margin:20px 0;
           ? cssTextString.replaceAll(/((?<=(\d,|:|;))\s)|(0(?=\.))|((?<=[^-0-9]0)px)/g, '')
           // add new line characters between declarations
-          : cssTextString.replaceAll('; ', `;\n${isNested ? '    ' : '  '}`)
-      )
+          : '\n' + cssTextString.replaceAll('; ', `;\n${isNested ? '    ' : '  '}`) + '\n'
+      ) + (hasSiblings ? '' : '}')
 
     } else {
-      const cssTextString = cssTextMapToString(
-        object[k],
-        Boolean(Object.keys((object[k] || {})).filter(_ => _ !== 'chain').length),
-        minifyEnabled,
-      ).join('');
+      const hasSingleNestedChild = Object.keys((object[k] || {})).filter(_ => _ !== 'chain' && _ !== 'cssText').length <= 1
+      const cssTextString = cssTextMapToString(object[k], !hasSingleNestedChild, minifyEnabled).join('');
       
-      const isChild = isNested && !object.chain
-      const nestCharacter = addNestCharacter(isChild, isNested && object.cssText, minifyEnabled)
+      const nestCharacter = addNestCharacter(!object[k].chain, (isNested || !!object.cssText), minifyEnabled)
       const selector = k.startsWith('>') ? '' : addSelector(k, minifyEnabled)
 
-      const openingBrackets = openBrackets(skipNesting || object.chain, object[k].cssText, isNested, minifyEnabled)
-      const closingBrackets = closeBrackets(skipNesting || object.chain, object[k].cssText, isNested, minifyEnabled)
+      const hasSingleChildOrCssTextOnly = Object.keys((object[k] || {})).filter(_ => _ !== 'chain').length <= 1
+      const openingBrackets = openBrackets(hasSingleChildOrCssTextOnly, isNested, minifyEnabled)
+      const closingBrackets = closeBrackets(hasSingleChildOrCssTextOnly, isNested, minifyEnabled)
 
-      // TODO remove any spaces after closing brackets '} ' and '; '
-      return `${nestCharacter}${selector}${openingBrackets}${cssTextString}${closingBrackets}`.replaceAll(';}', '}')
+      return `${nestCharacter}${selector}${openingBrackets}${cssTextString}${closingBrackets}`
     }
   })
 }
@@ -222,7 +219,7 @@ export function getMinifiedCSS(styleSheet, minifyEnabled) {
 
   const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
-  return cssTextString;
+  return removeSpacesAndSemiColons(cssTextString);
 }
 
 /**
@@ -273,17 +270,29 @@ function addSelector(selector, minifyEnabled) {
     ? selector.replaceAll(/(?<=(:|,))\s/g, '')
     : selector
 }
-function openBrackets(isSelectorOnly, selectorHasCss, isNested, minifyEnabled) {
-  if (isSelectorOnly && !selectorHasCss) {
+function openBrackets(hasSingleChildOrCssTextOnly, isNested, minifyEnabled) {
+  if (hasSingleChildOrCssTextOnly) {
     return ''
   }
   return minifyEnabled ? '{' : `{\n  ${isNested ? '  ' : ''}`
 }
-function closeBrackets(isSelectorOnly, selectorHasCss, isNested, minifyEnabled) {
-  if (isSelectorOnly && !selectorHasCss) {
+function closeBrackets(hasSingleChildOrCssTextOnly, isNested, minifyEnabled) {
+  if (hasSingleChildOrCssTextOnly) {
     return ''
   }
   return minifyEnabled ? '}' : `\n${isNested ? '  ' : ''}}\n`
+}
+
+/**
+ * Removes extra characters:
+ * 1. ; followed by a }
+ * 2. space preceded by a }
+ * 3. space preceded by a ;
+ * @param {String} cssText 
+ * @returns {String}
+ */
+function removeSpacesAndSemiColons(cssText) {
+  return cssText.replaceAll(/;(?=\})|(?<=\})\s|(?<=;)\s/g, '').trim();
 }
 
 /**

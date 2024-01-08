@@ -140,10 +140,10 @@
     width: 10vh;
   }
   .nav ul {
-    width: 10vh;
+    width: 20vh;
   }
   .nav ul li {
-    width: 10vh;
+    width: 30vh;
   }
   .nav ul li a {
     width: 50vh;
@@ -158,14 +158,4 @@
 }
 .a.d {
   padding: 30px;
-}
-
-
-/* TODO fix */
-.a .c {
-  padding: 10px;
-}
-
-.a:after {
-  margin: 1rem;
 }
