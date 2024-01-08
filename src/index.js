@@ -108,8 +108,16 @@ function displayResults(afterStyleSheet, before) {
   nestedCSSContainer.querySelector('#textarea-after').value = after
   // show character length comparison - assuming UTF-8 encoding - 1 character = 1 byte
   // Can get encoding from Content-Type header in charset parameter
-  nestedCSSContainer.querySelector('.before .file-weight').textContent = `Original: ${textToKBs(before)} KBs`
-  nestedCSSContainer.querySelector('.after .file-weight').textContent = `With Nesting: ${textToKBs(after)} KBs`
+  const beforeKBs = textToKBs(before)
+  const afterKBs = textToKBs(after)
+  const percentageChange = ((afterKBs - beforeKBs) * 100 / beforeKBs).toFixed(2)
+  const changePolarity = percentageChange > 0 ? '+' : ''
+  const changePolarityColor = Number(percentageChange) === 0 ? '' : percentageChange < 0 ? 'green-text' : 'red-text'
+  const percentageChangeString = `<span class="${changePolarityColor}">${changePolarity}${percentageChange}%</span>`
+  const beforeHtmlString = `Original: ${beforeKBs} KBs`
+  const afterHtmlString = `Nested: ${afterKBs} KBs (${percentageChangeString})`
+  nestedCSSContainer.querySelector('.before .file-weight').innerHTML = beforeHtmlString
+  nestedCSSContainer.querySelector('.after .file-weight').innerHTML = afterHtmlString
 
   const copyButton = nestedCSSContainer.querySelector('.after #copy-button')
   copyButton.addEventListener('click', () => {
