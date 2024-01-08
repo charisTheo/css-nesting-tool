@@ -219,7 +219,7 @@ export function getMinifiedCSS(styleSheet, minifyEnabled) {
 
   const cssTextString = cssTextMapToString(TOP_SELECTORS_MAP, false, minifyEnabled).join('');
   // console.log('🪲 | cssTextString:', cssTextString);
-  return removeSpacesAndSemiColons(cssTextString);
+  return minifyEnabled ? removeSpacesAndSemiColons(cssTextString) : cssTextString
 }
 
 /**
