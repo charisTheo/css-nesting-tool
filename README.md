@@ -1,8 +1,8 @@
 # [CSS Nesting tool](https://charistheo.github.io/css-nesting-tool/)
 
-> This tools is publicly hosted here: https://charistheo.github.io/css-nesting-tool/
+> Publicly hosted here: https://charistheo.github.io/css-nesting-tool/
 
-Shrink your CSS files and benefit from improving rendering performance and decreasing the impact on your users' data with CSS Nesting.
+Shrink your CSS files and benefit from better rendering performance and save your users' data with CSS Nesting.
 
 🎉 [CSS Nesting is part of Interop 2024](https://github.com/web-platform-tests/interop/issues/420)
 📖 [Learn more about CSS Nesting](https://developer.chrome.com/articles/css-nesting/)
