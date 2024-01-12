@@ -1,9 +1,11 @@
 const NON_SELECTOR_RULE_TYPES = {
   0: { identifier: '@property', valueKey: 'cssText' },
   4: { identifier: '@media', valueKey: 'conditionText' },
+  // TODO 5: @font-face rule
   6: { identifier: '@page', valueKey: 'cssText' },
   7: { identifier: '@keyframes', valueKey: 'name' },
-  8: { identifier: '', valueKey: 'cssText' },
+  8: { identifier: '', valueKey: 'cssText' }, // keyframe rule i.e. from { transform: scale(1) }
+  10: { identifier: '', valueKey: 'cssText' }, // namespace rule i.e. @namespace svg url(http://www.w3.org/2000/svg);
   12: { identifier: '@supports', valueKey: 'conditionText' },
 }
 

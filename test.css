@@ -1,3 +1,5 @@
+@namespace svg url(http://www.w3.org/2000/svg);
+
 @layer defaults, first, second;
 
 @layer defaults {
@@ -10,6 +12,37 @@
   }
   body main {
     margin: 0 auto;
+  }
+}
+
+@property --item-size {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 40%;
+}
+
+@container (max-width: 400px) {
+  .card-child {
+    grid-template-columns: 1fr;
+  }
+}
+
+@container card (min-width: 400px) and (max-width: 499px) {
+  .card-child {
+    grid-template-columns: 2fr;
+  }
+}
+
+
+@scope (.card) {
+  img {
+      border-color: green;
+  }
+}
+
+@scope (.card) to (.card__content) {
+  img {
+      border-color: red;
   }
 }
 
@@ -91,32 +124,8 @@
   grid-template-columns: 1fr 1fr;
 }
 
-@container (max-width: 400px) {
-  .card-child {
-    grid-template-columns: 1fr;
-  }
-}
-
-@container card (min-width: 400px) and (max-width: 499px) {
-  .card-child {
-    grid-template-columns: 2fr;
-  }
-}
-
 @page {
   margin: 10px;
-}
-
-@scope (.card) {
-  img {
-      border-color: green;
-  }
-}
-
-@scope (.card) to (.card__content) {
-  img {
-      border-color: red;
-  }
 }
 
 @media screen and (min-width: 767px) {
