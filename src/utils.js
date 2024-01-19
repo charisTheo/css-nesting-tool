@@ -1,12 +1,12 @@
 const NON_SELECTOR_RULE_TYPES = {
-  0: { identifier: '@property', valueKey: 'cssText' },
-  4: { identifier: '@media', valueKey: 'conditionText' },
-  // TODO 5: @font-face rule
-  6: { identifier: '@page', valueKey: 'cssText' },
-  7: { identifier: '@keyframes', valueKey: 'name' },
-  8: { identifier: '', valueKey: 'cssText' }, // keyframe rule i.e. from { transform: scale(1) }
-  10: { identifier: '', valueKey: 'cssText' }, // namespace rule i.e. @namespace svg url(http://www.w3.org/2000/svg);
-  12: { identifier: '@supports', valueKey: 'conditionText' },
+  CSSPropertyRule: { identifier: '@property', valueKey: 'cssText' },
+  CSSMediaRule: { identifier: '@media', valueKey: 'conditionText' },
+  // TODO CSSFontFaceRule: { @font-face rule }
+  CSSPageRule: { identifier: '@page', valueKey: 'cssText' },
+  CSSKeyframesRule: { identifier: '@keyframes', valueKey: 'name' },
+  CSSKeyframeRule: { identifier: '', valueKey: 'cssText' }, // keyframe rule i.e. from { transform: scale(1) }
+  CSSNamespaceRule: { identifier: '', valueKey: 'cssText' },
+  CSSSupportsRule: { identifier: '@supports', valueKey: 'conditionText' },
 }
 
 function mapDescendantSelectorsToCssText(rule, currentLevel) {
@@ -16,66 +16,71 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
 
   if (!rule.selectorText) {
   // It's a @rule
-    if (NON_SELECTOR_RULE_TYPES[rule.type]) {
-
-      //! @container, @layer, @scope and @property rules are all of type '0'
-
-      //? Container Queries
-      if (rule instanceof CSSContainerRule) {
+    switch (rule.constructor.name) {
+      case 'CSSContainerRule': {
         const ruleName = `@container ${rule.containerQuery}`
-        currentLevel[ruleName] = {parentType: rule.type}
+        currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
           mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
-        return
+        break
       }
 
-      //? Scope rules
-      if (rule instanceof CSSScopeRule) {
+      case 'CSSScopeRule': {
         const ruleName = `@scope (${rule.start})${rule.end ? ` to (${rule.end})` : ''}`
-        currentLevel[ruleName] = {parentType: rule.type}
+        currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
           mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
-        return
+        break
       }
-      
-      //? Layer order
-      if (rule instanceof CSSLayerStatementRule) {
+
+      case 'CSSLayerStatementRule': {
         currentLevel['cssText'] = (currentLevel['cssText'] || '') + rule.cssText.replaceAll(', ', ',')
-        return
+        break
       }
 
-      //? Layer block rule
-      if (rule instanceof CSSLayerBlockRule) {
+      case 'CSSLayerBlockRule': {
         const ruleName = `@layer ${rule.name}`
-        currentLevel[ruleName] = {parentType: rule.type}
+        currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
           mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
         })
-        return
+        break
       }
-      
-      const { identifier, valueKey } = NON_SELECTOR_RULE_TYPES[rule.type]
 
-      if (identifier === '@page') {
-        currentLevel[identifier] = {cssText: rule[valueKey].replaceAll(/(@page|{|})/g, '').trim()}
-      } else if (identifier === '@property') {
-        currentLevel[`${identifier} ${rule.name}`] = {cssText: rule[valueKey].replaceAll(/(@property.*{|})/g, '').trim()}
-      } else {
-        currentLevel[`${identifier} ${rule[valueKey]}`] = {
-          ...(currentLevel[`${identifier} ${rule[valueKey]}`] || {}),
-          parentType: rule.type
+      case 'CSSPageRule':
+      case 'CSSPropertyRule':
+      case 'CSSKeyframesRule':
+      case 'CSSKeyframeRule':
+      case 'CSSNamespaceRule':
+      case 'CSSMediaRule':
+      case 'CSSSupportsRule': {
+        const { identifier, valueKey } = NON_SELECTOR_RULE_TYPES[rule.constructor.name]
+
+        if (identifier === '@page') {
+          currentLevel[identifier] = {cssText: rule[valueKey].replaceAll(/(@page|{|})/g, '').trim()}
+        } else if (identifier === '@property') {
+          currentLevel[`${identifier} ${rule.name}`] = {cssText: rule[valueKey].replaceAll(/(@property.*{|})/g, '').trim()}
+        } else {
+          currentLevel[`${identifier} ${rule[valueKey]}`] = {
+            ...(currentLevel[`${identifier} ${rule[valueKey]}`] || {}),
+            parentType: rule.constructor.name
+          }
         }
+
+        if (rule.cssRules) {
+          Array.from(rule.cssRules).map(r => {
+            mapDescendantSelectorsToCssText(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
+          })
+        }
+        break
       }
 
-      if (rule.cssRules) {
-        Array.from(rule.cssRules).map(r => {
-          mapDescendantSelectorsToCssText(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
-        })
+      default: {
+        console.warn('⚠️ | Uncaptured CSS rule | This rule will be omitted from the CSS output!', rule);
+        break
       }
-    } else {
-      console.warn('⚠️ | Uncaptured CSS rule | This rule will be omitted from the CSS output!', rule);
     }
     return
   }
@@ -138,9 +143,8 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
   mapDescendantSelectorsToCssText(
     {
       ...rule,
-      style: {
-        cssText: rule.style.cssText,
-      },
+      constructor: { name: rule.constructor.name },
+      style: { cssText: rule.style.cssText },
       selectorText: selectors.map(s => s.trim()).join(' ')
     }, 
     currentLevel[ruleTopSelector] || currentPartLevel
