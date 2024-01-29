@@ -48,7 +48,8 @@
 
 .nav {
   background: rgb(212, 187, 255);
-  color: rgb(0, 0, 0);
+  color: rgba(0 0 0 / 0.4);
+  border-color: rgba(100, 100, 100, 0.4);
   margin: 0 auto;
   max-width: fit-content;
   min-height: 64px;

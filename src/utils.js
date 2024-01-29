@@ -9,7 +9,7 @@ const NON_SELECTOR_RULE_TYPES = {
   CSSSupportsRule: { identifier: '@supports', valueKey: 'conditionText' },
 }
 
-function mapDescendantSelectorsToCssText(rule, currentLevel) {
+function mapDescendantSelectorsToCssText(rule, currentLevel, convertColorsEnabled) {
   if (rule === null) {
     return
   }
@@ -21,7 +21,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
         const ruleName = `@container ${rule.containerQuery}`
         currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
-          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName], convertColorsEnabled);
         })
         break
       }
@@ -30,7 +30,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
         const ruleName = `@scope (${rule.start})${rule.end ? ` to (${rule.end})` : ''}`
         currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
-          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName], convertColorsEnabled);
         })
         break
       }
@@ -44,7 +44,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
         const ruleName = `@layer ${rule.name}`
         currentLevel[ruleName] = {parentType: rule.constructor.name}
         Array.from(rule.cssRules).map(r => {
-          mapDescendantSelectorsToCssText(r, currentLevel[ruleName]);
+          mapDescendantSelectorsToCssText(r, currentLevel[ruleName], convertColorsEnabled);
         })
         break
       }
@@ -71,7 +71,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
 
         if (rule.cssRules) {
           Array.from(rule.cssRules).map(r => {
-            mapDescendantSelectorsToCssText(r, currentLevel[`${identifier} ${rule[valueKey]}`]);
+            mapDescendantSelectorsToCssText(r, currentLevel[`${identifier} ${rule[valueKey]}`], convertColorsEnabled);
           })
         }
         break
@@ -85,12 +85,14 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
     return
   }
 
+  const cssText = convertColorsEnabled ? shortenColors(rule.style.cssText) : rule.style.cssText
+
   // if multiple selectors, do not break them up i.e. `.s1, .s2 {}`
   if (rule.selectorText.indexOf(',') !== -1) {
     const ruleTopSelector = rule.selectorText;
     currentLevel[ruleTopSelector] = {
       ...(currentLevel[ruleTopSelector] || {}),
-      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
+      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + cssText
     }
     return
   }
@@ -104,7 +106,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
   if (isLastDescendant && !splitSimpleSelector(ruleTopSelector).length) {
     currentLevel[ruleTopSelector] = {
       ...(currentLevel[ruleTopSelector] || {}),
-      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + shortenColors(rule.style.cssText)
+      cssText: (currentLevel[ruleTopSelector]?.cssText || '') + cssText
     }
     return;
   }
@@ -124,7 +126,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
     if (isLastDescendant && isLastSelector) {
       currentPartLevel[part] = {
         ...currentPartLevel[part],
-        cssText: (currentPartLevel[part].cssText || '') + shortenColors(rule.style.cssText)
+        cssText: (currentPartLevel[part].cssText || '') + cssText
       }
     }
     if (i !== 0) {
@@ -147,7 +149,8 @@ function mapDescendantSelectorsToCssText(rule, currentLevel) {
       style: { cssText: rule.style.cssText },
       selectorText: selectors.map(s => s.trim()).join(' ')
     }, 
-    currentLevel[ruleTopSelector] || currentPartLevel
+    currentLevel[ruleTopSelector] || currentPartLevel,
+    convertColorsEnabled
   );
 }
 
@@ -211,9 +214,10 @@ function cssTextsFromSelectorsMap(object, isNested = false, minifyEnabled) {
  * 
  * @param {StyleSheet} styleSheet
  * @param {Boolean} minifyEnabled
+ * @param {Boolean} convertColorsEnabled
  * @returns 
  */
-export function getNestedCSS(styleSheet, minifyEnabled) {
+export function getNestedCSS(styleSheet, minifyEnabled, convertColorsEnabled) {
   const SELECTORS_MAP = {}
 
   const rules = Array.from(styleSheet?.cssRules || styleSheet?.rules)
@@ -221,7 +225,7 @@ export function getNestedCSS(styleSheet, minifyEnabled) {
   
   mergeCommonCssTextRules(rules)
 
-  rules.forEach(rule => mapDescendantSelectorsToCssText(rule, SELECTORS_MAP))
+  rules.forEach(rule => mapDescendantSelectorsToCssText(rule, SELECTORS_MAP, convertColorsEnabled))
 
   const cssTextStringArray = cssTextsFromSelectorsMap(SELECTORS_MAP, false, minifyEnabled)
   const cssTextString = cssTextStringArray.join('')
