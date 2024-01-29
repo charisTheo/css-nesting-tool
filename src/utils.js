@@ -196,7 +196,7 @@ function cssTextsFromSelectorsMap(object, isNested = false, minifyEnabled) {
       const cssTextString = cssTextsFromSelectorsMap(object[k], !hasSingleNestedChild, minifyEnabled).join('');
       
       const nestCharacter = addNestCharacter(!object[k].chain, (isNested || !!object.cssText), minifyEnabled)
-      const selector = k.startsWith('>') ? '' : addSelector(k, minifyEnabled)
+      const selector = addSelector(k, minifyEnabled)
 
       const hasSingleChildOrCssTextOnly = Object.keys((object[k] || {})).filter(_ => _ !== 'chain').length <= 1
       const openingBrackets = openBrackets(hasSingleChildOrCssTextOnly, isNested, minifyEnabled)
