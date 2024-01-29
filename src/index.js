@@ -141,6 +141,13 @@ function displayResults(afterStyleSheet, before) {
       copyButton.style.removeProperty('--md-fab-icon-color')
     }, 3000);
   })
+
+  // If scrolled to top of the page, scroll to result
+  setTimeout(() => {
+    if (window.scrollY < 50) {
+      nestedCSSContainer.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, 0);
 }
 
 document.querySelector("md-switch[aria-controls='browser-support-embed']").addEventListener('change', e => {
