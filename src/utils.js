@@ -1,7 +1,7 @@
 const NON_SELECTOR_RULE_TYPES = {
   CSSPropertyRule: { identifier: '@property', valueKey: 'cssText' },
   CSSMediaRule: { identifier: '@media', valueKey: 'conditionText' },
-  // TODO CSSFontFaceRule: { @font-face rule }
+  CSSFontFaceRule: { identifier: '', valueKey: 'cssText' },
   CSSPageRule: { identifier: '@page', valueKey: 'cssText' },
   CSSKeyframesRule: { identifier: '@keyframes', valueKey: 'name' },
   CSSKeyframeRule: { identifier: '', valueKey: 'cssText' }, // keyframe rule i.e. from { transform: scale(1) }
@@ -49,6 +49,7 @@ function mapDescendantSelectorsToCssText(rule, currentLevel, convertColorsEnable
         break
       }
 
+      case 'CSSFontFaceRule':
       case 'CSSPageRule':
       case 'CSSPropertyRule':
       case 'CSSKeyframesRule':

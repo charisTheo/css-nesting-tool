@@ -15,6 +15,14 @@
   }
 }
 
+@font-face {
+  font-family: 'Source Code Pro';
+  src: url(/static/webfonts/s/sourcecodepro/v22/HI_diYsKILxRpg3hIP6sJ7fM7PqPMcMnZFqUwX28DMyQtMlrTA.woff2) format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
 @property --item-size {
   syntax: "<percentage>";
   inherits: true;
