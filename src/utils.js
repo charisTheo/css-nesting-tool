@@ -311,7 +311,6 @@ function removeSpacesAndSemiColons(cssText) {
  * ? https://colorjs.io/notebook/
  * Shorten RGB colors to Hexadecimal
  * ? Supported color spaces: https://colorjs.io/docs/spaces
- * TODO throws error on variable colors: `--color: rgba(19, 19, 19);`
  * @param {String} cssText
  * @returns 
  */
